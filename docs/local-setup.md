@@ -1,5 +1,7 @@
 # Configuración local
 
+[English](local-setup.en.md) · **Español**
+
 La raíz del repo contiene `compose.yaml`. `server/configs/config.json` usa datos ficticios; `server/configs/config.live.json` incluye OpenRouter directo y Codex personal/laboral directo con login en servidor.
 
 Cada cuenta define `id`, `name`, `provider`, `scope`, `source` y, para OpenRouter directo, `credentialEnv`. IDs únicos en minúsculas, dígitos, guiones y guiones bajos. JSON estricto: campos desconocidos se rechazan.

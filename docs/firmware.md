@@ -1,5 +1,7 @@
 # Firmware y pantalla — pendiente
 
+[English](firmware.en.md) · **Español**
+
 Destino: `firmware/esp32-c6-lcd-1.47/`. No hay firmware compilable todavía. Elegir y verificar toolchain/librerías compatibles con ESP32-C6 y ST7789 antes de implementar; usar los ejemplos oficiales Waveshare como referencia.
 
 Configuración prevista: SSID, contraseña Wi-Fi, URL de API, token de lectura y zona horaria. Mantener esos valores fuera del repo. Las credenciales del proveedor no deben ir en el ESP32.

@@ -1,5 +1,7 @@
 # Cómo conectar cada proveedor
 
+[English](conectar.en.md) · **Español**
+
 Guía paso a paso. Cada proveedor se conecta una sola vez; después el servidor consulta solo cada `POLL_INTERVAL` (5 minutos por defecto).
 
 | Proveedor | Cómo se conecta | Dónde queda la credencial | Estado |
@@ -121,7 +123,7 @@ Para una segunda cuenta, agregá otra entrada con otra variable (por ejemplo `CU
 
 Muestra las ventanas de 5 horas y 7 días de Claude Pro/Max.
 
-**Antes de usarlo:** los términos de Anthropic no permiten que una aplicación de terceros inicie sesión con Claude.ai ni guarde sus tokens, y eso es lo que hace este provider. El riesgo es sobre tu cuenta. Leé la [advertencia completa](claude.md).
+**Antes de usarlo:** los términos de Anthropic no permiten que una aplicación de terceros inicie sesión con Claude.ai ni guarde sus tokens, y eso es lo que hace este provider. El riesgo es sobre tu cuenta. Leé la [advertencia completa](claude-subscription.md).
 
 1. La cuenta en la configuración:
 
@@ -148,7 +150,7 @@ Muestra las ventanas de 5 horas y 7 días de Claude Pro/Max.
 
 5. Verificá con `GET /usage`. Esperado: cupos `five-hour` y `seven-day` en `percent`.
 
-El servidor renueva la sesión solo. Si pasa a `auth_required`, repetí los pasos 2 a 4. Más detalle en [claude.md](claude.md).
+El servidor renueva la sesión solo. Si pasa a `auth_required`, repetí los pasos 2 a 4. Más detalle en [claude-subscription.md](claude-subscription.md).
 
 ## Seguridad
 

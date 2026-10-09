@@ -1,5 +1,7 @@
 # Cursor
 
+[English](cursor.en.md) · **Español**
+
 Estado: **experimental**. Usa el endpoint que alimenta el panel de uso de cursor.com. No está documentado por Cursor, puede cambiar sin aviso y no se validó todavía con una cuenta real; los tests usan respuestas con la forma reportada por terceros.
 
 No requiere ser administrador: lee solo el uso de la cuenta que inició sesión.

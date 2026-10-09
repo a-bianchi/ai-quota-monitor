@@ -1,5 +1,7 @@
 # API v1
 
+[English](api.en.md) · **Español**
+
 ## Login con usuario y contraseña
 
 Opcional. Se habilita definiendo `AUTH_USERNAME` y `AUTH_PASSWORD` (8+ caracteres) junto con `COLLECTOR_TOKEN`; sin ellas, estos endpoints responden 503. `DEVICE_TOKEN` y `COLLECTOR_TOKEN` siguen funcionando igual.
@@ -35,7 +37,7 @@ Encabezados opcionales:
 | `X-Timezone` | Zona IANA, por ejemplo `Europe/Madrid` o `UTC` | `America/Argentina/Buenos_Aires` (UTC-3) |
 | `Accept-Language` | `es` o `en` | `es` |
 
-`X-Timezone` convierte `generatedAt`, `updatedAt` y `resetsAt` a esa zona; el instante es el mismo, cambia el desplazamiento (`-03:00`, `+02:00`, o `Z` para UTC). Una zona desconocida devuelve 400. `Accept-Language` traduce `quotas[].name`; se usa el primer idioma soportado de la lista y cualquier otro cae en español. Los nombres de cuenta vienen de la configuración y no se traducen, igual que los nombres propios que envíe un recolector.
+`X-Timezone` convierte `generatedAt`, `updatedAt` y `resetsAt` a esa zona; el instante es el mismo, cambia el desplazamiento (`-03:00`, `+02:00`, o `Z` para UTC). Una zona desconocida devuelve 400. `Accept-Language` traduce `quotas[].name`; se usa el primer idioma soportado de la lista y cualquier otro cae en español. Los `id` de los cupos nunca se traducen. Los nombres de cuenta vienen de la configuración y no se traducen, igual que los nombres propios que envíe un recolector.
 
 Respuesta:
 
@@ -100,4 +102,4 @@ POST y GET `/accounts/{id}/codex/login`, con `Authorization: Bearer COLLECTOR_TO
 
 ## Login Claude en homelab
 
-`/accounts/{id}/claude/login`, con `Authorization: Bearer COLLECTOR_TOKEN`. Solo cuentas provider=anthropic, source=direct. POST inicia el login y devuelve `verificationUrl`; PUT con `{"code":"codigo#estado"}` lo completa; GET informa el estado. DEVICE_TOKEN no tiene acceso. Experimental y no permitido por los términos de Anthropic: ver [flujo y advertencia](providers/claude.md).
+`/accounts/{id}/claude/login`, con `Authorization: Bearer COLLECTOR_TOKEN`. Solo cuentas provider=anthropic, source=direct. POST inicia el login y devuelve `verificationUrl`; PUT con `{"code":"codigo#estado"}` lo completa; GET informa el estado. DEVICE_TOKEN no tiene acceso. Experimental y no permitido por los términos de Anthropic: ver [flujo y advertencia](providers/claude-subscription.md).

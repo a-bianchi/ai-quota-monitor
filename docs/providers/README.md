@@ -1,5 +1,7 @@
 # Proveedores
 
+[English](README.en.md) · **Español**
+
 Para conectar tus cuentas, ver la [guía paso a paso](conectar.md).
 
 La implementación específica de cada servicio vive en `server/internal/providers/<proveedor>/`:
@@ -27,7 +29,7 @@ Los datos no representan todos los cupos del chat normal de ChatGPT.
 
 ## Claude — integrado en servidor, experimental
 
-`source: direct`, `provider: anthropic`. Login OAuth por HTTP y lectura de las ventanas de 5h y 7d desde un endpoint no documentado. Es la suscripción, no gasto de API. **Los términos de Anthropic no permiten este uso de las credenciales**; leer la advertencia en [setup de Claude](claude.md) antes de activarlo. No se validó con una cuenta real.
+`source: direct`, `provider: anthropic`. Login OAuth por HTTP y lectura de las ventanas de 5h y 7d desde un endpoint no documentado. Es la suscripción, no gasto de API. **Los términos de Anthropic no permiten este uso de las credenciales**; leer la advertencia en [setup de Claude](claude-subscription.md) antes de activarlo. No se validó con una cuenta real.
 
 ## Cursor — cliente implementado, experimental
 

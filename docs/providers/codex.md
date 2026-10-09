@@ -1,5 +1,7 @@
 # Codex en el servidor / homelab
 
+[English](codex.en.md) · **Español**
+
 La API Go inicia el login por código de dispositivo mediante Codex App Server. El usuario autoriza en su navegador y Codex guarda/renueva las credenciales en el servidor. No se requiere un recolector en la Mac ni copiar cookies o access tokens a la API.
 
 ## Configuración
@@ -60,7 +62,7 @@ Cuando se completa el login, el servidor consulta inmediatamente los cupos. Lueg
 
 Sesiones en DATA_DIR/codex/<account-id>/; en Docker son /data/codex/<account-id>/ dentro del volumen usage-data. Cada cuenta tiene credenciales separadas. Reiniciar conserva sesiones; borrar el volumen las elimina. Tratar el volumen y sus backups como secretos. No exponer esta carpeta ni ponerla en Git.
 
-Solo se usan endpoints de cuenta: initialize, account/login/start (chatgptDeviceCode), account/read y account/rateLimits/read. No hay prompts, herramientas ni consumo de reset credits. La API no recibe ni devuelve cookies ni access/refresh tokens.
+Solo se usan endpoints de cuenta: initialize, account/login/start (chatgptDeviceCode), account/read y account/rateLimits/read. No hay prompts, herramientas ni consumo de reset credits. La API no recibe ni devuelve cookies ni access/refresh tokens. Codex se inicia con los plugins desactivados, porque no hacen falta para leer límites.
 
 El ID codex-work no verifica qué cuenta elegiste: revisar cuenta/workspace durante el login. Se conserva la distinción de buckets reales y sus duraciones; no se inventan ventanas que no aparezcan en la respuesta. Estos límites corresponden a Codex/Work, no a todos los chats de ChatGPT.
 

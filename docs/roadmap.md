@@ -1,5 +1,7 @@
 # Roadmap
 
+[English](roadmap.en.md) · **Español**
+
 ## Implementado
 
 - Servidor Go sin dependencias externas.

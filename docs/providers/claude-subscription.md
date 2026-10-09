@@ -1,5 +1,7 @@
 # Claude (suscripción Pro/Max)
 
+[English](claude-subscription.en.md) · **Español**
+
 Muestra los límites de la suscripción de Claude: ventana de 5 horas, ventana de 7 días y, si existen, las semanales por modelo. No son créditos de la API de Anthropic.
 
 ## Advertencia: leer antes de usar

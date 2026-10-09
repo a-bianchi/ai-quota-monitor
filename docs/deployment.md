@@ -1,5 +1,7 @@
 # Despliegue
 
+[English](deployment.en.md) · **Español**
+
 ## Docker Compose / homelab
 
 Seguí el README. El volumen `usage-data` conserva las observaciones entre reinicios; `docker compose --env-file server/.env down -v` lo elimina. Los datos se guardan por combinación fuente/cuenta: cambiar de mock a real no reutiliza datos ficticios.

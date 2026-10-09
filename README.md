@@ -1,5 +1,7 @@
 # AI Quota Monitor
 
+[English](README.en.md) · **Español**
+
 Monitor de escritorio para ver el saldo de servicios de IA, con páginas separadas para **Personal** y **Trabajo**, usando una Waveshare ESP32-C6-LCD-1.47.
 
 **Estado: MVP del servidor.** API Go, modo de ejemplo, persistencia y cliente OpenRouter implementados. Codex integrado en el servidor con login por código de dispositivo y perfiles aislados. Firmware, otros recolectores y carcasa todavía pendientes. No se publican datos ni credenciales de cuentas reales.
@@ -54,7 +56,7 @@ Para usar OpenRouter real, poné `CONFIG_NAME=config.live.json` y tu management 
 |---|---|---|
 | OpenRouter | Cliente implementado | API oficial de créditos; requiere management key |
 | Codex / Work | Integrado en servidor; login HTTP por código y polling automático | App Server `account/rateLimits/read` |
-| Claude Pro/Max | Integrado en servidor, experimental; [no permitido por los términos de Anthropic](docs/providers/claude.md) | Login OAuth y endpoint de uso no documentado |
+| Claude Pro/Max | Integrado en servidor, experimental; [no permitido por los términos de Anthropic](docs/providers/claude-subscription.md) | Login OAuth y endpoint de uso no documentado |
 | Cursor | Cliente implementado, experimental; sin validar con cuenta real | Endpoint no documentado del dashboard (`/api/usage-summary`) con cookie de sesión |
 | Kiro | Investigación pendiente con acceso sin admin | Panel de créditos; vía automática por validar |
 | ChatGPT normal | No integrado | No se confirmó un contador completo por API |

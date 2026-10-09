@@ -1,5 +1,7 @@
 # Hardware
 
+[English](hardware.en.md) · **Español**
+
 Modelo objetivo: **Waveshare ESP32-C6-LCD-1.47** (no S3 ni versión Touch). Pantalla 172 × 320, controlador ST7789 por SPI, Wi-Fi de 2,4 GHz, LED RGB y microSD. Alimentación USB; no se asumen batería, cargador, IMU ni táctil.
 
 Lista de materiales inicial:
