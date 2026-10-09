@@ -145,82 +145,11 @@ func TestTimezoneAndLanguage(t *testing.T) {
 	if code, _, _ = get("Mars/Olympus", ""); code != 400 {
 		t.Fatalf("invalid zone got %d", code)
 	}
-	if stored, _ := store.Get("direct:a"); stored.Quotas[0].Name != "Semanal" || stored.Quotas[0].ResetsAt.Location() != time.UTC {
+	if !strings.Contains(raw, `"usageLevel":"low"`) || quotas[0].UsageLevel != "low" {
+		t.Fatalf("usage level must be returned: %s", raw)
+	}
+	if stored, _ := store.Get("direct:a"); stored.Quotas[0].Name != "Semanal" || stored.Quotas[0].ResetsAt.Location() != time.UTC || stored.Quotas[0].UsageLevel != "" {
 		t.Fatal("stored report must not be modified")
-	}
-}
-
-func TestSessionLogin(t *testing.T) {
-	a := &API{DeviceToken: "device", CollectorToken: "collector", Username: "alejo", Password: "secret-password", LoginFailureDelay: time.Millisecond}
-	h := a.Handler()
-	call := func(method, path, bearer, body string) (int, map[string]any) {
-		r := httptest.NewRequest(method, path, strings.NewReader(body))
-		if bearer != "" {
-			r.Header.Set("Authorization", "Bearer "+bearer)
-		}
-		w := httptest.NewRecorder()
-		h.ServeHTTP(w, r)
-		out := map[string]any{}
-		_ = json.Unmarshal(w.Body.Bytes(), &out)
-		return w.Code, out
-	}
-	for _, body := range []string{`{"username":"alejo","password":"wrong"}`, `{"username":"other","password":"secret-password"}`, `{}`} {
-		if code, _ := call("POST", "/auth/login", "", body); code != 401 {
-			t.Fatalf("%s got %d", body, code)
-		}
-	}
-	if code, _ := call("POST", "/auth/login", "", `not json`); code != 400 {
-		t.Fatalf("bad JSON got %d", code)
-	}
-	code, tokens := call("POST", "/auth/login", "", `{"username":"alejo","password":"secret-password"}`)
-	access, _ := tokens["accessToken"].(string)
-	refresh, _ := tokens["refreshToken"].(string)
-	if code != 200 || access == "" || refresh == "" || tokens["expiresIn"] != float64(900) || tokens["tokenType"] != "Bearer" {
-		t.Fatalf("login %d %v", code, tokens)
-	}
-	// The access token works like COLLECTOR_TOKEN; the refresh token only refreshes.
-	if code, _ = call("GET", "/usage", access, ""); code != 200 {
-		t.Fatalf("access token on /usage got %d", code)
-	}
-	if code, _ = call("GET", "/accounts/x/codex/login", access, ""); code != 404 {
-		t.Fatalf("access token on login route got %d", code)
-	}
-	if code, _ = call("GET", "/usage", refresh, ""); code != 401 {
-		t.Fatalf("refresh token on /usage got %d", code)
-	}
-	if code, _ = call("GET", "/usage", access[:len(access)-2]+"xx", ""); code != 401 {
-		t.Fatalf("tampered token got %d", code)
-	}
-	if code, _ = call("POST", "/auth/refresh", "", `{"refreshToken":"`+access+`"}`); code != 401 {
-		t.Fatalf("access token used as refresh got %d", code)
-	}
-	code, tokens = call("POST", "/auth/refresh", "", `{"refreshToken":"`+refresh+`"}`)
-	renewed, _ := tokens["accessToken"].(string)
-	if code != 200 || renewed == "" {
-		t.Fatalf("refresh %d %v", code, tokens)
-	}
-	if code, _ = call("GET", "/usage", renewed, ""); code != 200 {
-		t.Fatalf("renewed token got %d", code)
-	}
-	expired := a.issue(a.sessionKey(), "access", -time.Minute)
-	if code, _ = call("GET", "/usage", expired, ""); code != 401 {
-		t.Fatalf("expired token got %d", code)
-	}
-	// Changing the password invalidates every token.
-	a.Password = "another-password"
-	if code, _ = call("GET", "/usage", access, ""); code != 401 {
-		t.Fatalf("token after password change got %d", code)
-	}
-	if code, _ = call("POST", "/auth/refresh", "", `{"refreshToken":"`+refresh+`"}`); code != 401 {
-		t.Fatalf("refresh after password change got %d", code)
-	}
-	// Without credentials the endpoints are off and static tokens keep working.
-	a.Username, a.Password = "", ""
-	if code, _ = call("POST", "/auth/login", "", `{"username":"","password":""}`); code != 503 {
-		t.Fatalf("disabled login got %d", code)
-	}
-	if code, _ = call("GET", "/usage", "collector", ""); code != 200 {
-		t.Fatalf("static token got %d", code)
 	}
 }
 

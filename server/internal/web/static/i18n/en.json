@@ -1,0 +1,69 @@
+{
+  "nav": { "label": "Sections", "dashboard": "Services", "display": "Display", "settings": "Settings", "logout": "Log out" },
+  "common": {
+    "language": "Language", "loading": "Loading…", "refresh": "Refresh", "refreshing": "Refreshing…",
+    "mock": "MOCK", "updated": "Last update: {time}", "never": "No updates yet", "checked": "Checked: {time}"
+  },
+  "scope": { "personal": "Personal", "work": "Work" },
+  "login": {
+    "title": "Log in", "intro": "Sign in with the panel user.", "username": "Username", "password": "Password",
+    "submit": "Log in", "busy": "Logging in…", "required": "Enter username and password.",
+    "invalid": "Wrong username or password.", "rate": "Too many failed attempts. Try again in {minutes} min.",
+    "disabled": "The panel login is not configured on the server.", "expired": "The session expired. Log in again."
+  },
+  "status": {
+    "ok": "Up to date", "stale": "Stale", "auth_required": "Login needed", "unavailable": "No data", "unknown": "Unknown",
+    "hint": {
+      "stale": "Showing the last known data: the latest query failed or the reset time already passed.",
+      "auth_required": "This account needs a login or a credential. Check Settings.",
+      "unavailable": "The provider query failed and there is no earlier data."
+    }
+  },
+  "quota": {
+    "usedPercent": "{used}% used", "leftPercent": "{left}% left",
+    "usedOf": "{used} of {limit} used", "left": "{left} left", "usedOnly": "{used} used",
+    "unknown": "No value", "exhausted": "Exhausted", "resets": "Resets: {time}",
+    "unit": { "credits": "credits", "tokens": "tokens" }
+  },
+  "dashboard": {
+    "title": "Services", "note": "Each account's status comes from its latest query to the provider.",
+    "noAccounts": "No accounts configured in this group.", "noData": "No quotas to show yet."
+  },
+  "display": {
+    "title": "Display", "note": "Preview of the content planned for the ESP32 screen (172 × 320 px), with real data from the API.",
+    "page": "Page", "scale": "Scale", "rotate": "Switch every 10 s", "screen": "Device screen",
+    "noAccounts": "No accounts", "noData": "No data", "updated": "Upd. {time}"
+  },
+  "settings": {
+    "title": "Settings", "loginStatus": "Login status:", "check": "Check status", "openAuth": "Open authorization page",
+    "expires": "Expires: {time}", "storageOff": "The server has no MASTER_KEY: credentials cannot be saved from the panel. Environment variables keep working.",
+    "subtitle": "{provider} · {scope}",
+    "codex": {
+      "intro": "Sign in with your ChatGPT account. The session is stored on the server.",
+      "start": "Start login", "code": "Code to enter on the page", "started": "Open the authorization page and enter the code.",
+      "done": "Signed in. Quotas update in a few seconds."
+    },
+    "claude": {
+      "warning": "Experimental: Anthropic's terms do not permit this use of the subscription. The risk is on your account.",
+      "start": "Start login", "code": "Code shown by the page (code#state)", "send": "Send code",
+      "started": "Open the authorization page, authorize and paste the code here.", "codeRequired": "Paste the full code.",
+      "done": "Signed in. Quotas update in a few seconds."
+    },
+    "credential": {
+      "state": "Credential:", "stored": "Configured (stored encrypted on the server)", "env": "Configured (environment variable)", "missing": "Not configured",
+      "field": { "openrouter": "OpenRouter management key", "cursor": "WorkosCursorSessionToken cookie", "default": "Credential" },
+      "save": "Save", "replace": "Replace", "saving": "Saving…", "required": "Paste the credential before saving.",
+      "saved": "Credential saved. Quotas update in a few seconds.",
+      "note": "The stored value is never shown. A value saved from the panel takes priority over the environment variable."
+    },
+    "plain": { "mock": "Example account: no configuration needed.", "collector": "This account's data is sent by an external collector.", "none": "This account is not configured from the panel." },
+    "login": { "unknown": "Not checked", "starting": "Starting…", "pending": "Waiting for authorization", "authenticated": "Signed in", "auth_required": "Login needed", "failed": "Failed" }
+  },
+  "provider": { "openai": "Codex (ChatGPT)", "openrouter": "OpenRouter", "cursor": "Cursor", "anthropic": "Claude", "kiro": "Kiro" },
+  "errors": {
+    "network": "Could not reach the server.", "server": "The server answered with an error ({status}).",
+    "rate": "Too many attempts. Wait a few minutes.", "disabled": "This feature is disabled on the server.",
+    "notFound": "The server does not know this account.", "busy": "The account is busy or the login expired. Try again.",
+    "invalid": "The server rejected the value sent.", "provider": "The provider did not answer correctly."
+  }
+}

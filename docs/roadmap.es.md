@@ -11,6 +11,7 @@
 - Ingestión de observaciones para cuentas collector.
 - Persistencia de última observación y detección de datos viejos.
 - Docker Compose, documentación y CI de Go.
+- Panel web incluido en el servidor: login con sesiones rotativas, tablero, vista previa de la pantalla del ESP32 y configuración de proveedores.
 - Codex en el servidor: login HTTP por device code, perfiles aislados y polling automático.
 
 ## Próximo

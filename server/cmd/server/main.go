@@ -3,21 +3,28 @@ package main
 import (
 	"ai-quota-monitor/server/internal/config"
 	"ai-quota-monitor/server/internal/httpapi"
+	"ai-quota-monitor/server/internal/panelauth"
 	"ai-quota-monitor/server/internal/providers/claude"
 	"ai-quota-monitor/server/internal/providers/codex"
 	"ai-quota-monitor/server/internal/providers/cursor"
 	"ai-quota-monitor/server/internal/providers/openrouter"
+	"ai-quota-monitor/server/internal/secrets"
 	"ai-quota-monitor/server/internal/storage"
 	"ai-quota-monitor/server/internal/usage"
+	"ai-quota-monitor/server/internal/web"
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 	// Embedded so X-Timezone works in images without a zone database.
@@ -45,12 +52,17 @@ func run() error {
 	if collector != "" && (len(collector) < 32 || collector == device) {
 		return errors.New("COLLECTOR_TOKEN must contain at least 32 characters and differ from DEVICE_TOKEN")
 	}
-	username, password := os.Getenv("AUTH_USERNAME"), os.Getenv("AUTH_PASSWORD")
-	if (username == "") != (password == "") {
-		return errors.New("set both AUTH_USERNAME and AUTH_PASSWORD, or neither")
+	if os.Getenv("AUTH_PASSWORD") != "" {
+		return errors.New("AUTH_PASSWORD is no longer supported: run `make panel-password`, set AUTH_PASSWORD_HASH with its output and remove AUTH_PASSWORD")
 	}
-	if username != "" && (len(password) < 8 || collector == "") {
-		return errors.New("login requires AUTH_PASSWORD with at least 8 characters and COLLECTOR_TOKEN")
+	username, passwordHash := os.Getenv("AUTH_USERNAME"), os.Getenv("AUTH_PASSWORD_HASH")
+	if (username == "") != (passwordHash == "") {
+		return errors.New("set both AUTH_USERNAME and AUTH_PASSWORD_HASH, or neither")
+	}
+	if passwordHash != "" {
+		if e := panelauth.CheckHash(passwordHash); e != nil {
+			return errors.New("AUTH_PASSWORD_HASH is not valid; generate it with `make panel-password`")
+		}
 	}
 	interval, e := duration("POLL_INTERVAL", "5m")
 	if e != nil || interval < time.Second {
@@ -73,12 +85,28 @@ func run() error {
 	if e != nil {
 		return e
 	}
+	sessions, e := panelauth.Open(env("DATA_DIR", "./data"))
+	if e != nil {
+		return e
+	}
+	secretStore, e := secrets.Open(env("DATA_DIR", "./data"), os.Getenv("MASTER_KEY"))
+	if e != nil {
+		return e
+	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	codexManager := codex.New(ctx, env("CODEX_BIN", "codex"), filepath.Join(env("DATA_DIR", "./data"), "codex"))
 	claudeManager := claude.New(filepath.Join(env("DATA_DIR", "./data"), "claude"))
 	slog.Info("configuration loaded", "path", configPath)
-	api := &httpapi.API{CodexAuth: codexManager, ClaudeAuth: claudeManager, Accounts: cfg.Accounts, Store: store, DeviceToken: device, CollectorToken: collector, StaleAfter: stale, Username: username, Password: password}
+	api := &httpapi.API{CodexAuth: codexManager, ClaudeAuth: claudeManager, Accounts: cfg.Accounts, Store: store, DeviceToken: device, CollectorToken: collector, StaleAfter: stale, Username: username, PasswordHash: passwordHash, Sessions: sessions, Secrets: secretStore, Web: web.Handler()}
+	// Collect again right after a credential is replaced from the panel.
+	credentialChanged := make(chan struct{}, 1)
+	api.OnCredential = func() {
+		select {
+		case credentialChanged <- struct{}{}:
+		default:
+		}
+	}
 	var mocks map[string][]usage.Quota
 	for _, a := range cfg.Accounts {
 		if a.Source == "mock" {
@@ -128,9 +156,9 @@ func run() error {
 				case "anthropic":
 					report, err = claudeManager.Read(ctx, a.ID)
 				case "cursor":
-					report, err = (cursor.Cursor{}).Collect(ctx, os.Getenv(a.CredentialEnv))
+					report, err = (cursor.Cursor{}).Collect(ctx, api.Credential(a.ID, a.CredentialEnv))
 				default:
-					report, err = (openrouter.OpenRouter{}).Collect(ctx, os.Getenv(a.CredentialEnv))
+					report, err = (openrouter.OpenRouter{}).Collect(ctx, api.Credential(a.ID, a.CredentialEnv))
 				}
 			}
 			if err != nil {
@@ -168,6 +196,8 @@ func run() error {
 				collect()
 			case <-claudeManager.Ready:
 				collect()
+			case <-credentialChanged:
+				collect()
 			}
 		}
 	}()
@@ -186,7 +216,52 @@ func run() error {
 	}
 	return nil
 }
+
+// hashPassword reads a password from stdin and prints the line for .env.
+// The password is never stored or logged.
+func hashPassword() error {
+	stty := func(arg string) {
+		cmd := exec.Command("stty", arg)
+		cmd.Stdin = os.Stdin
+		_ = cmd.Run()
+	}
+	read := func(prompt string) (string, error) {
+		fmt.Fprint(os.Stderr, prompt)
+		line, e := bufio.NewReader(os.Stdin).ReadString('\n')
+		fmt.Fprintln(os.Stderr)
+		if e != nil && line == "" {
+			return "", errors.New("no password received")
+		}
+		return strings.TrimRight(line, "\r\n"), nil
+	}
+	// Hide typing when run from a terminal; has no effect on piped input.
+	stty("-echo")
+	defer stty("echo")
+	password, e := read(fmt.Sprintf("Panel password (at least %d characters): ", panelauth.MinPasswordLength))
+	if e != nil {
+		return e
+	}
+	if info, _ := os.Stdin.Stat(); info != nil && info.Mode()&os.ModeCharDevice != 0 {
+		again, e := read("Repeat password: ")
+		if e != nil || again != password {
+			return errors.New("passwords do not match")
+		}
+	}
+	hash, e := panelauth.HashPassword(password)
+	if e != nil {
+		return e
+	}
+	fmt.Println("AUTH_PASSWORD_HASH=" + hash)
+	return nil
+}
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "hash-password" {
+		if e := hashPassword(); e != nil {
+			fmt.Fprintln(os.Stderr, "error:", e)
+			os.Exit(1)
+		}
+		return
+	}
 	if e := run(); e != nil {
 		slog.Error("startup failed", "error", e)
 		os.Exit(1)

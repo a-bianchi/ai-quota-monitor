@@ -13,7 +13,26 @@ type Quota struct {
 	Used     *float64   `json:"used"`
 	Limit    *float64   `json:"limit"`
 	ResetsAt *time.Time `json:"resetsAt"`
+	// UsageLevel is computed by the server for responses; reports must not send it.
+	UsageLevel string `json:"usageLevel,omitempty"`
 }
+
+// Level classifies used/limit: "low" under 50%, "medium" from 50% to 80%
+// inclusive, "high" above 80%, and "unknown" when it cannot be computed.
+func (q Quota) Level() string {
+	if q.Used == nil || q.Limit == nil || *q.Limit <= 0 {
+		return "unknown"
+	}
+	switch percent := *q.Used / *q.Limit * 100; {
+	case percent < 50:
+		return "low"
+	case percent <= 80:
+		return "medium"
+	default:
+		return "high"
+	}
+}
+
 type Subscription struct {
 	ID        string     `json:"id"`
 	Name      string     `json:"name"`
@@ -43,6 +62,9 @@ func ValidateReport(r Report, now time.Time) error {
 			return fmt.Errorf("quota IDs must be unique; IDs and names are required and bounded")
 		}
 		seen[q.ID] = true
+		if q.UsageLevel != "" {
+			return fmt.Errorf("usageLevel is computed by the server and cannot be sent")
+		}
 		switch q.Unit {
 		case "percent", "credits", "usd", "tokens":
 		default:

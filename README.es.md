@@ -50,6 +50,17 @@ make build
 
 Para usar OpenRouter real, poné `CONFIG_NAME=config.live.json` y tu management key en `server/.env`. Reiniciá con `make run` o `make docker-up`.
 
+## Panel web
+
+La API también sirve un panel web en <http://localhost:8080/>: tablero de servicios, vista previa de la pantalla del ESP32 y configuración para iniciar sesión en Codex y cargar keys de proveedores. Va incluido en el servidor (sin Node ni paso de build) y queda deshabilitado hasta que crees un usuario:
+
+```sh
+make panel-password        # pide una contraseña e imprime AUTH_PASSWORD_HASH=...
+openssl rand -base64 32    # valor para MASTER_KEY
+```
+
+Poné `AUTH_USERNAME`, la línea `AUTH_PASSWORD_HASH` y `MASTER_KEY` en `server/.env`, reiniciá y abrí la URL. Detalle en [panel web](docs/panel.es.md).
+
 ## Integraciones
 
 | Servicio | Estado del repo | Fuente |
@@ -97,6 +108,7 @@ Importá los dos archivos en Postman (**Import** → arrastrá ambos), elegí el
 
 ## Documentación
 
+- [Panel web](docs/panel.es.md)
 - [Contrato y endpoints](docs/api.es.md)
 - [Colección y environment de Postman](docs/collections/)
 - [Configuración local y variables](docs/local-setup.es.md)
@@ -106,7 +118,7 @@ Importá los dos archivos en Postman (**Import** → arrastrá ambos), elegí el
 - [Carcasa e impresión 3D](enclosure/README.es.md)
 - [Roadmap](docs/roadmap.es.md)
 
-Configuración JSON en `server/configs/`; secretos en `server/.env` o variables de entorno. Esta primera versión usa exclusivamente la biblioteca estándar de Go. El modo mock sirve para desarrollar sin hardware.
+Configuración JSON en `server/configs/`; secretos en `server/.env` o variables de entorno. El servidor usa solo la biblioteca estándar de Go; el panel incluye Alpine.js localmente. El modo mock sirve para desarrollar sin hardware.
 
 ## Contribuir
 

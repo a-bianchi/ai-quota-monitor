@@ -10,6 +10,14 @@ For the ESP32 to reach the server from your LAN, set `HOST_BIND` to the server's
 
 Both local Go and Docker use `CONFIG_NAME` and the files in `server/configs/`. The Dockerfile includes the configurations, and Compose mounts that directory so they can be changed without rebuilding the image. `.env` is excluded from the image; secrets are injected through the environment.
 
+## Web panel
+
+The panel is part of the same binary and container: it is served at `/` on the same port as the API, with nothing else to deploy. Set `AUTH_USERNAME`, `AUTH_PASSWORD_HASH` and `MASTER_KEY` in `server/.env` (or in the platform's variables); Compose passes them to the container. See [web panel](panel.md) to create the user.
+
+Panel sessions (`panel-sessions.json`) and encrypted provider credentials (`credentials.json`) live in the `usage-data` volume next to the Codex and Claude sessions. Keep `MASTER_KEY` outside that volume: a copy of the volume alone must not be enough to read the credentials. Losing `MASTER_KEY` means loading them again.
+
+Reach the panel over HTTPS whenever it is not on a trusted network. `HOST_BIND` controls who can connect, as for the API.
+
 ## Coolify or cloud
 
 You can deploy `compose.yaml` from Git, set the variables in the panel and keep the volume. Point the platform's proxy at the container's port 8080; this may require removing the `ports` mapping from Compose. No real Coolify deployment has been tested yet.

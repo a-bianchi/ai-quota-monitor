@@ -4,9 +4,9 @@
 
 A ready-to-import Postman collection and environment for these endpoints live in [`docs/collections/`](collections/).
 
-## Login with username and password
+## Panel session
 
-Optional. Enabled by setting `AUTH_USERNAME` and `AUTH_PASSWORD` (8+ characters) together with `COLLECTOR_TOKEN`; without them, these endpoints answer 503. `DEVICE_TOKEN` and `COLLECTOR_TOKEN` keep working the same way.
+Used by the [web panel](panel.md); optional. Enabled by setting `AUTH_USERNAME` and `AUTH_PASSWORD_HASH`; without them these endpoints answer 503. `DEVICE_TOKEN` and `COLLECTOR_TOKEN` are independent and keep working the same way.
 
 `POST /auth/login`, without `Authorization`:
 
@@ -17,20 +17,26 @@ Optional. Enabled by setting `AUTH_USERNAME` and `AUTH_PASSWORD` (8+ characters)
 200 response:
 
 ```json
-{"tokenType": "Bearer", "accessToken": "<jwt>", "expiresIn": 900, "refreshToken": "<jwt>"}
+{"tokenType": "Bearer", "accessToken": "aqm_a_...", "expiresIn": 900, "refreshToken": "aqm_r_..."}
 ```
 
-`POST /auth/refresh` with `{"refreshToken": "<jwt>"}` returns the same shape, with new tokens.
+- `POST /auth/refresh` with `{"refreshToken": "..."}` returns the same shape with new tokens. The refresh token used stops working; presenting it again revokes the session.
+- `POST /auth/logout` revokes the session of the access token in `Authorization` or of `{"refreshToken": "..."}` in the body. It answers 204.
+- `accessToken` lasts 15 minutes; `refreshToken` lasts 30 days without use and only works for `/auth/refresh` and `/auth/logout`.
+- 401 for wrong credentials or an invalid, expired or already used refresh token; 400 for invalid JSON; 429 with `Retry-After` after too many failed logins.
 
-- `accessToken` lasts 15 minutes and is used as `Authorization: Bearer <accessToken>`. It grants the same permissions as `COLLECTOR_TOKEN`: reading `/usage`, ingesting data and starting provider logins.
-- `refreshToken` lasts 30 days and only works for `/auth/refresh`.
-- 401 if the credentials or the refresh token are invalid or expired; 400 if the JSON is invalid.
+The server stores only hashes of the tokens, so sessions survive restarts. See [which routes accept a panel session](panel.md#session).
 
-The tokens are signed JWTs (HS256) and the server does not store them: they remain valid after a restart. There is no logout or per-token revocation; to invalidate all of them, change `AUTH_PASSWORD` or `COLLECTOR_TOKEN`. A failed login takes one second to answer; there is no lockout after repeated attempts, so use a strong password and HTTPS if the API leaves your network.
+## Panel configuration
+
+Panel session only; the static tokens are not accepted.
+
+- `GET /accounts` lists the configured accounts and what can be set up for each: `login` (`codex`, `claude` or empty) and `credential` (`null`, or `{"configured": true, "origin": "stored" | "env"}`). `credentialStorage` tells whether `MASTER_KEY` is set. Credential values are never returned.
+- `PUT /accounts/{id}/credential` with `{"value": "..."}` stores or replaces the credential of an account that uses `credentialEnv`. 404 if the account does not use one, 400 for an empty or multi-line value, 503 without `MASTER_KEY`.
 
 ## Reading
 
-`GET /usage`, with `Authorization: Bearer DEVICE_TOKEN`. It also accepts `COLLECTOR_TOKEN`, so everything can be tested with a single token from Postman. Optional filter `?scope=personal` or `?scope=work`. `GET /healthz` is public and only indicates that the HTTP process responds; it does not guarantee that the providers are available.
+`GET /usage`, with `Authorization: Bearer DEVICE_TOKEN`. It also accepts `COLLECTOR_TOKEN` and a panel session. Optional filter `?scope=personal` or `?scope=work`. `GET /healthz` is public and only indicates that the HTTP process responds; it does not guarantee that the providers are available.
 
 Optional headers:
 
@@ -61,7 +67,8 @@ Response (with `Accept-Language: en`):
       "unit": "percent",
       "used": 11,
       "limit": 100,
-      "resetsAt": "2026-10-08T20:20:00-03:00"
+      "resetsAt": "2026-10-08T20:20:00-03:00",
+      "usageLevel": "low"
     }]
   }]
 }
@@ -74,6 +81,7 @@ The values above are fictitious. Dates are RFC3339/ISO 8601, in Argentina time (
 - `source`: `mock`, `direct`, `collector`.
 - `status`: `ok`, `stale`, `auth_required`, `unavailable`.
 - `unit`: `percent`, `credits`, `usd`, `tokens`.
+- `usageLevel`: computed by the server from `used / limit`: `low` (under 50%), `medium` (50% to 80% inclusive), `high` (above 80%), `unknown` (`used` or `limit` missing, or a limit of 0). Response only; an ingestion report that includes it is rejected.
 - `used`, `limit`, `updatedAt`, `resetsAt` may be `null` where applicable.
 - `quotas` is a list, empty while there is no data yet.
 
@@ -100,8 +108,8 @@ Only accounts declared with `source: collector` are accepted; identity metadata 
 
 ## Codex login on the homelab
 
-POST and GET `/accounts/{id}/codex/login`, with `Authorization: Bearer COLLECTOR_TOKEN`. Only accounts with provider=openai, source=direct. POST starts the device-code login and returns the official code/URL; GET reports the status. DEVICE_TOKEN has no access. If COLLECTOR_TOKEN is empty, the endpoints are disabled (503). See the [flow](providers/codex.md).
+POST and GET `/accounts/{id}/codex/login`, with `Authorization: Bearer COLLECTOR_TOKEN` or a panel session. Only accounts with provider=openai, source=direct. POST starts the device-code login and returns the official code/URL; GET reports the status. DEVICE_TOKEN has no access. If neither COLLECTOR_TOKEN nor the panel login is configured, the endpoints are disabled (503). See the [flow](providers/codex.md).
 
 ## Claude login on the homelab
 
-`/accounts/{id}/claude/login`, with `Authorization: Bearer COLLECTOR_TOKEN`. Only accounts with provider=anthropic, source=direct. POST starts the login and returns `verificationUrl`; PUT with `{"code":"code#state"}` completes it; GET reports the status. DEVICE_TOKEN has no access. Experimental and not permitted by Anthropic's terms: see the [flow and warning](providers/claude-subscription.md).
+`/accounts/{id}/claude/login`, with `Authorization: Bearer COLLECTOR_TOKEN` or a panel session. Only accounts with provider=anthropic, source=direct. POST starts the login and returns `verificationUrl`; PUT with `{"code":"code#state"}` completes it; GET reports the status. DEVICE_TOKEN has no access. Experimental and not permitted by Anthropic's terms: see the [flow and warning](providers/claude-subscription.md).

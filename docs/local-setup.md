@@ -10,7 +10,8 @@ Each account defines `id`, `name`, `provider`, `scope`, `source` and, for direct
 |---|---|
 | `DEVICE_TOKEN` | Required, at least 32 characters; reading metrics |
 | `COLLECTOR_TOKEN` | Optional; if set, at least 32 characters and different from the previous one |
-| `AUTH_USERNAME`, `AUTH_PASSWORD` | Optional, set together; they enable `POST /auth/login`. Password of 8+ characters; they require `COLLECTOR_TOKEN` |
+| `AUTH_USERNAME`, `AUTH_PASSWORD_HASH` | Optional, set together; they enable the [web panel](panel.md). The hash comes from `make panel-password`; never a plain-text password |
+| `MASTER_KEY` | Optional, 32+ characters; encrypts the provider credentials saved from the panel |
 | `HTTP_HOST` | `127.0.0.1` without Docker; Compose uses `0.0.0.0` inside the container |
 | `HTTP_PORT` | `8080`; in Compose it sets the host port |
 | `HOST_BIND` | Compose only: `127.0.0.1` for local access |
@@ -19,7 +20,7 @@ Each account defines `id`, `name`, `provider`, `scope`, `source` and, for direct
 | `DATA_DIR` | Binary: `./data`; Compose: `/data` with a persistent volume |
 | `POLL_INTERVAL` | `5m`; Go duration, minimum 1s |
 | `STALE_AFTER` | `15m`; must be >= the interval |
-| `OPENROUTER_PERSONAL_KEY` | Management key, only for the live configuration |
+| `OPENROUTER_PERSONAL_KEY` | Management key, only for the live configuration. Fallback: a key saved from the panel takes priority |
 | `CURSOR_WORK_SESSION` | cursor.com session cookie, only for the live configuration; see [Cursor](providers/cursor.md) |
 
 ## Real OpenRouter with Compose

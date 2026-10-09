@@ -2,8 +2,10 @@ package httpapi
 
 import (
 	"ai-quota-monitor/server/internal/config"
+	"ai-quota-monitor/server/internal/panelauth"
 	"ai-quota-monitor/server/internal/providers/claude"
 	"ai-quota-monitor/server/internal/providers/codex"
+	"ai-quota-monitor/server/internal/secrets"
 	"ai-quota-monitor/server/internal/storage"
 	"ai-quota-monitor/server/internal/usage"
 	"crypto/subtle"
@@ -12,7 +14,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 )
@@ -25,11 +26,19 @@ type API struct {
 	DeviceToken    string
 	CollectorToken string
 	StaleAfter     time.Duration
-	// Username and Password enable POST /auth/login; both empty disables it.
-	Username, Password string
-	LoginFailureDelay  time.Duration
-	mu                 sync.RWMutex
-	failures           map[string]string
+	// Username, PasswordHash and Sessions enable the web panel login.
+	Username, PasswordHash string
+	Sessions               *panelauth.Sessions
+	// Secrets holds provider credentials saved from the panel; nil disables it.
+	Secrets *secrets.Store
+	// OnCredential is called after a credential is replaced.
+	OnCredential func()
+	// Web serves the panel's static files.
+	Web           http.Handler
+	loginLimiter  *panelauth.Limiter
+	globalLimiter *panelauth.Limiter
+	mu            sync.RWMutex
+	failures      map[string]string
 }
 
 func (a *API) Failure(id, status string) {
@@ -45,45 +54,56 @@ func (a *API) Failure(id, status string) {
 	}
 }
 func (a *API) Handler() http.Handler {
+	a.loginLimiter = panelauth.NewLimiter(5, 15*time.Minute)
+	a.globalLimiter = panelauth.NewLimiter(50, 15*time.Minute)
 	m := http.NewServeMux()
 	m.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { write(w, 200, map[string]string{"status": "ok"}) })
-	m.Handle("POST /auth/login", a.session(a.login))
-	m.Handle("POST /auth/refresh", a.session(a.refresh))
-	m.Handle("GET /usage", a.auth(http.HandlerFunc(a.list), a.DeviceToken, a.CollectorToken))
-	m.Handle("PUT /accounts/{id}/usage", a.auth(http.HandlerFunc(a.ingest), a.CollectorToken))
-	m.Handle("POST /accounts/{id}/codex/login", a.auth(http.HandlerFunc(a.codexLogin), a.CollectorToken))
-	m.Handle("GET /accounts/{id}/codex/login", a.auth(http.HandlerFunc(a.codexStatus), a.CollectorToken))
-	m.Handle("POST /accounts/{id}/claude/login", a.auth(http.HandlerFunc(a.claudeLogin), a.CollectorToken))
-	m.Handle("PUT /accounts/{id}/claude/login", a.auth(http.HandlerFunc(a.claudeCode), a.CollectorToken))
-	m.Handle("GET /accounts/{id}/claude/login", a.auth(http.HandlerFunc(a.claudeStatus), a.CollectorToken))
+	m.Handle("POST /auth/login", a.panelOnly(a.login))
+	m.Handle("POST /auth/refresh", a.panelOnly(a.refresh))
+	m.Handle("POST /auth/logout", a.panelOnly(a.logout))
+	m.Handle("GET /usage", a.auth(a.list, true, a.DeviceToken, a.CollectorToken))
+	m.Handle("PUT /accounts/{id}/usage", a.auth(a.ingest, false, a.CollectorToken))
+	m.Handle("GET /accounts", a.auth(a.accounts, true))
+	m.Handle("PUT /accounts/{id}/credential", a.auth(a.credential, true))
+	m.Handle("POST /accounts/{id}/codex/login", a.auth(a.codexLogin, true, a.CollectorToken))
+	m.Handle("GET /accounts/{id}/codex/login", a.auth(a.codexStatus, true, a.CollectorToken))
+	m.Handle("POST /accounts/{id}/claude/login", a.auth(a.claudeLogin, true, a.CollectorToken))
+	m.Handle("PUT /accounts/{id}/claude/login", a.auth(a.claudeCode, true, a.CollectorToken))
+	m.Handle("GET /accounts/{id}/claude/login", a.auth(a.claudeStatus, true, a.CollectorToken))
+	if a.Web != nil {
+		m.Handle("GET /{$}", a.Web)
+		m.Handle("GET /static/", a.Web)
+	}
 	return m
 }
 
-// auth accepts any of the given tokens, or an access token from /auth/login.
-// The first token is required for the endpoint to be enabled.
-func (a *API) auth(next http.Handler, tokens ...string) http.Handler {
+// auth protects a route. A panel session is accepted when panel is true, and
+// any of the given static tokens that is configured. The panel session and the
+// static tokens are independent of each other.
+func (a *API) auth(next http.HandlerFunc, panel bool, tokens ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
-		if tokens[0] == "" {
-			write(w, 503, map[string]string{"error": "endpoint disabled"})
-			return
-		}
 		got := []byte(r.Header.Get("Authorization"))
-		ok := 0
-		if bearer, found := strings.CutPrefix(string(got), "Bearer "); found && a.validToken(bearer, "access") {
+		enabled, ok := panel && a.panelEnabled(), 0
+		if enabled && a.Sessions.Valid(bearer(r)) {
 			ok = 1
 		}
 		for _, token := range tokens {
 			if token != "" {
+				enabled = true
 				ok |= subtle.ConstantTimeCompare(got, []byte("Bearer "+token))
 			}
+		}
+		if !enabled {
+			write(w, 503, map[string]string{"error": "endpoint disabled"})
+			return
 		}
 		if ok != 1 {
 			w.Header().Set("WWW-Authenticate", "Bearer")
 			write(w, 401, map[string]string{"error": "unauthorized"})
 			return
 		}
-		next.ServeHTTP(w, r)
+		next(w, r)
 	})
 }
 func write(w http.ResponseWriter, status int, v any) {

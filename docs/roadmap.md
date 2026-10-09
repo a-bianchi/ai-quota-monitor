@@ -11,6 +11,7 @@
 - Ingestion of observations for collector accounts.
 - Persistence of the latest observation and stale-data detection.
 - Docker Compose, documentation and Go CI.
+- Web panel embedded in the server: login with rotating sessions, dashboard, ESP32 screen preview and provider configuration.
 - Codex on the server: HTTP device-code login, isolated profiles and automatic polling.
 
 ## Next

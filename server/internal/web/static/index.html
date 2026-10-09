@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>AI Quota Monitor</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script defer src="/static/app.js"></script>
+  <script defer src="/static/vendor/alpine-csp-3.17.4.min.js"></script>
+</head>
+<body x-data="panel">
+  <noscript><p class="boot">JavaScript is required. / Se necesita JavaScript.</p></noscript>
+  <p class="boot" x-show="booting">…</p>
+
+  <div class="shell" x-show="ready" x-cloak>
+    <header class="top">
+      <span class="brand">AI Quota Monitor</span>
+      <nav class="nav" x-show="authed" x-bind:aria-label="tr('nav.label')">
+        <a href="#/dashboard" x-bind:class="navClass('dashboard')" x-text="tr('nav.dashboard')"></a>
+        <a href="#/display" x-bind:class="navClass('display')" x-text="tr('nav.display')"></a>
+        <a href="#/settings" x-bind:class="navClass('settings')" x-text="tr('nav.settings')"></a>
+      </nav>
+      <div class="tools">
+        <label class="lang">
+          <span class="sr" x-text="tr('common.language')"></span>
+          <select x-on:change="setLanguage($event.target.value)" x-bind:value="lang">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <button type="button" class="ghost" x-show="authed" x-on:click="logout()" x-text="tr('nav.logout')"></button>
+      </div>
+    </header>
+
+    <!-- Login -->
+    <main class="center" x-show="showLogin">
+      <form class="card login" x-on:submit.prevent="submitLogin($event)" novalidate>
+        <h1 x-text="tr('login.title')"></h1>
+        <p class="muted" x-text="tr('login.intro')"></p>
+        <label>
+          <span x-text="tr('login.username')"></span>
+          <input name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </label>
+        <label>
+          <span x-text="tr('login.password')"></span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <p class="alert" role="alert" x-show="login.error" x-text="login.error"></p>
+        <button type="submit" x-bind:disabled="login.busy" x-text="loginButton"></button>
+      </form>
+    </main>
+
+    <!-- Dashboard -->
+    <main x-show="showDashboard">
+      <div class="bar">
+        <h1 x-text="tr('dashboard.title')"></h1>
+        <span class="muted" x-text="usage.checkedText"></span>
+        <button type="button" class="ghost" x-on:click="loadUsage()" x-bind:disabled="usage.loading" x-text="refreshButton"></button>
+      </div>
+      <p class="muted" x-text="tr('dashboard.note')"></p>
+      <p class="alert" role="alert" x-show="usage.error" x-text="usage.error"></p>
+      <p class="muted" role="status" x-show="usageFirstLoad" x-text="tr('common.loading')"></p>
+
+      <template x-for="group in groups" x-bind:key="group.scope">
+        <section class="group" x-show="usage.loaded">
+          <h2 x-bind:class="group.titleClass" x-text="group.title"></h2>
+          <p class="empty" x-show="group.empty" x-text="tr('dashboard.noAccounts')"></p>
+          <div class="grid">
+            <template x-for="account in group.accounts" x-bind:key="account.id">
+              <article class="card account">
+                <header>
+                  <div>
+                    <h3 x-text="account.name"></h3>
+                    <span class="muted" x-text="account.providerLabel"></span>
+                    <span class="tag" x-show="account.mock" x-text="tr('common.mock')"></span>
+                  </div>
+                  <span x-bind:class="account.statusClass">
+                    <span aria-hidden="true" x-text="account.statusIcon"></span>
+                    <span x-text="account.statusLabel"></span>
+                  </span>
+                </header>
+                <p class="hint" x-show="account.statusHint" x-text="account.statusHint"></p>
+                <p class="empty" x-show="account.empty" x-text="tr('dashboard.noData')"></p>
+                <template x-for="quota in account.quotas" x-bind:key="quota.id">
+                  <div class="quota">
+                    <div class="row">
+                      <span x-text="quota.name"></span>
+                      <strong x-text="quota.leftText"></strong>
+                    </div>
+                    <progress max="100" x-show="quota.hasBar" x-bind:value="quota.percent" x-bind:class="quota.level" x-bind:aria-label="quota.usedText"></progress>
+                    <div class="row muted small">
+                      <span x-text="quota.usedText"></span>
+                      <span x-text="quota.resetText"></span>
+                    </div>
+                  </div>
+                </template>
+                <footer class="muted small" x-text="account.updatedText"></footer>
+              </article>
+            </template>
+          </div>
+        </section>
+      </template>
+    </main>
+
+    <!-- Display -->
+    <main x-show="showDisplay">
+      <div class="bar">
+        <h1 x-text="tr('display.title')"></h1>
+      </div>
+      <p class="muted" x-text="tr('display.note')"></p>
+      <p class="alert" role="alert" x-show="usage.error" x-text="usage.error"></p>
+      <div class="controls">
+        <div class="seg" role="group" x-bind:aria-label="tr('display.page')">
+          <button type="button" x-bind:class="scopeClass('personal')" x-bind:aria-pressed="scopePressed('personal')" x-on:click="setScope('personal')" x-text="tr('scope.personal')"></button>
+          <button type="button" x-bind:class="scopeClass('work')" x-bind:aria-pressed="scopePressed('work')" x-on:click="setScope('work')" x-text="tr('scope.work')"></button>
+        </div>
+        <div class="seg" role="group" x-bind:aria-label="tr('display.scale')">
+          <button type="button" x-bind:class="scaleClass(1)" x-on:click="setScale(1)">1×</button>
+          <button type="button" x-bind:class="scaleClass(2)" x-on:click="setScale(2)">2×</button>
+          <button type="button" x-bind:class="scaleClass(3)" x-on:click="setScale(3)">3×</button>
+        </div>
+        <label class="check">
+          <input type="checkbox" x-on:change="setRotate($event.target.checked)" x-bind:checked="display.rotate">
+          <span x-text="tr('display.rotate')"></span>
+        </label>
+      </div>
+      <div x-bind:class="deviceWrapClass">
+        <div x-bind:class="deviceClass" x-bind:aria-label="tr('display.screen')">
+          <div class="d-head">
+            <span x-text="deviceTitle"></span>
+            <span x-text="deviceClock"></span>
+          </div>
+          <p class="d-empty" x-show="deviceLoading" x-text="tr('common.loading')"></p>
+          <p class="d-empty" x-show="deviceEmpty" x-text="tr('display.noAccounts')"></p>
+          <template x-for="account in deviceAccounts" x-bind:key="account.id">
+            <div class="d-card">
+              <div class="d-row">
+                <span class="d-name" x-text="account.name"></span>
+                <span x-bind:class="account.deviceStatusClass" x-text="account.deviceStatus"></span>
+              </div>
+              <p class="d-empty" x-show="account.empty" x-text="tr('display.noData')"></p>
+              <template x-for="quota in account.quotas" x-bind:key="quota.id">
+                <div>
+                  <div class="d-row d-quota">
+                    <span x-text="quota.name"></span>
+                    <span x-text="quota.leftShort"></span>
+                  </div>
+                  <progress max="100" x-show="quota.hasBar" x-bind:value="quota.percent" x-bind:class="quota.level"></progress>
+                  <div class="d-reset" x-show="quota.resetShort" x-text="quota.resetShort"></div>
+                </div>
+              </template>
+              <div class="d-reset" x-text="account.updatedShort"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </main>
+
+    <!-- Settings -->
+    <main x-show="showSettings">
+      <div class="bar">
+        <h1 x-text="tr('settings.title')"></h1>
+        <button type="button" class="ghost" x-on:click="loadSettings()" x-bind:disabled="settings.loading" x-text="tr('common.refresh')"></button>
+      </div>
+      <p class="alert" role="alert" x-show="settings.error" x-text="settings.error"></p>
+      <p class="muted" role="status" x-show="settingsFirstLoad" x-text="tr('common.loading')"></p>
+      <p class="hint" x-show="storageOff" x-text="tr('settings.storageOff')"></p>
+
+      <div class="grid">
+        <template x-for="account in settings.accounts" x-bind:key="account.id">
+          <article class="card account">
+            <header>
+              <div>
+                <h3 x-text="account.name"></h3>
+                <span class="muted" x-text="account.subtitle"></span>
+              </div>
+            </header>
+
+            <!-- Codex: device-code login -->
+            <div x-show="account.isCodex">
+              <p class="muted" x-text="tr('settings.codex.intro')"></p>
+              <p><span x-text="tr('settings.loginStatus')"></span> <strong x-text="account.loginLabel"></strong></p>
+              <div class="code-box" x-show="account.userCode">
+                <span class="muted small" x-text="tr('settings.codex.code')"></span>
+                <code x-text="account.userCode"></code>
+                <a x-show="account.url" x-bind:href="account.url" target="_blank" rel="noopener noreferrer" x-text="tr('settings.openAuth')"></a>
+                <span class="muted small" x-text="account.expiresText"></span>
+              </div>
+              <div class="actions">
+                <button type="button" x-on:click="startCodex(account.id)" x-bind:disabled="account.busy" x-text="tr('settings.codex.start')"></button>
+                <button type="button" class="ghost" x-on:click="checkLogin(account.id)" x-bind:disabled="account.busy" x-text="tr('settings.check')"></button>
+              </div>
+            </div>
+
+            <!-- Claude: authorization URL and pasted code -->
+            <div x-show="account.isClaude">
+              <p class="hint" x-text="tr('settings.claude.warning')"></p>
+              <p><span x-text="tr('settings.loginStatus')"></span> <strong x-text="account.loginLabel"></strong></p>
+              <div class="code-box" x-show="account.url">
+                <a x-bind:href="account.url" target="_blank" rel="noopener noreferrer" x-text="tr('settings.openAuth')"></a>
+                <span class="muted small" x-text="account.expiresText"></span>
+              </div>
+              <form class="inline" x-show="account.url" x-on:submit.prevent="submitClaudeCode($event, account.id)" novalidate>
+                <label>
+                  <span x-text="tr('settings.claude.code')"></span>
+                  <input name="code" type="text" autocomplete="off" spellcheck="false">
+                </label>
+                <button type="submit" x-bind:disabled="account.busy" x-text="tr('settings.claude.send')"></button>
+              </form>
+              <div class="actions">
+                <button type="button" x-on:click="startClaude(account.id)" x-bind:disabled="account.busy" x-text="tr('settings.claude.start')"></button>
+                <button type="button" class="ghost" x-on:click="checkLogin(account.id)" x-bind:disabled="account.busy" x-text="tr('settings.check')"></button>
+              </div>
+            </div>
+
+            <!-- Key or cookie stored encrypted on the server -->
+            <div x-show="account.hasCredential">
+              <p><span x-text="tr('settings.credential.state')"></span> <strong x-text="account.credentialLabel"></strong></p>
+              <form class="inline" x-on:submit.prevent="saveCredential($event, account.id)" novalidate>
+                <label>
+                  <span x-text="account.credentialField"></span>
+                  <input name="value" type="password" autocomplete="off" spellcheck="false" x-bind:disabled="storageOff">
+                </label>
+                <button type="submit" x-bind:disabled="account.saveDisabled" x-text="account.saveLabel"></button>
+              </form>
+              <p class="muted small" x-text="tr('settings.credential.note')"></p>
+            </div>
+
+            <p class="muted" x-show="account.plain" x-text="account.plainText"></p>
+            <p class="ok" role="status" x-show="account.message" x-text="account.message"></p>
+            <p class="alert" role="alert" x-show="account.error" x-text="account.error"></p>
+          </article>
+        </template>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

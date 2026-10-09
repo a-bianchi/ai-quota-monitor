@@ -27,7 +27,7 @@ func SessionEnv(home string) []string {
 	for _, entry := range os.Environ() {
 		key, _, _ := strings.Cut(entry, "=")
 		switch key {
-		case "CODEX_HOME", "OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_ACCESS_TOKEN", "DEVICE_TOKEN", "COLLECTOR_TOKEN", "OPENROUTER_PERSONAL_KEY", "CURSOR_WORK_SESSION", "AUTH_USERNAME", "AUTH_PASSWORD", "ADMIN_TOKEN":
+		case "CODEX_HOME", "OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_ACCESS_TOKEN", "DEVICE_TOKEN", "COLLECTOR_TOKEN", "OPENROUTER_PERSONAL_KEY", "CURSOR_WORK_SESSION", "AUTH_USERNAME", "AUTH_PASSWORD", "AUTH_PASSWORD_HASH", "MASTER_KEY", "ADMIN_TOKEN":
 			continue
 		}
 		out = append(out, entry)

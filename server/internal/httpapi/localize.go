@@ -54,7 +54,7 @@ func translate(name string) string {
 	return strings.Join(parts, " · ")
 }
 
-// localize returns a copy of the quotas with names in lang and reset times in loc.
+// localize returns a copy of the quotas with names in lang, reset times in loc and the usage level.
 func localize(quotas []usage.Quota, lang string, loc *time.Location) []usage.Quota {
 	out := make([]usage.Quota, len(quotas))
 	for i, q := range quotas {
@@ -65,6 +65,7 @@ func localize(quotas []usage.Quota, lang string, loc *time.Location) []usage.Quo
 			t := q.ResetsAt.In(loc)
 			q.ResetsAt = &t
 		}
+		q.UsageLevel = q.Level()
 		out[i] = q
 	}
 	return out

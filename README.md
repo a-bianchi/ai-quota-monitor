@@ -50,6 +50,17 @@ make build
 
 To use real OpenRouter data, set `CONFIG_NAME=config.live.json` and your management key in `server/.env`. Restart with `make run` or `make docker-up`.
 
+## Web panel
+
+The API also serves a web panel at <http://localhost:8080/>: services dashboard, a preview of the ESP32 screen, and settings to sign in to Codex and load provider keys. It is embedded in the server (no Node or build step) and is disabled until you create a user:
+
+```sh
+make panel-password        # asks for a password and prints AUTH_PASSWORD_HASH=...
+openssl rand -base64 32    # value for MASTER_KEY
+```
+
+Put `AUTH_USERNAME`, the `AUTH_PASSWORD_HASH` line and `MASTER_KEY` in `server/.env`, restart and open the URL. Details in [web panel](docs/panel.md).
+
 ## Integrations
 
 | Service | Repo status | Source |
@@ -93,10 +104,11 @@ The server queries the direct OpenRouter/Codex sources and keeps the optional in
 - `ai-quota-monitor.postman_collection.json`: login, refresh, `GET /usage` and the Codex and Claude login requests.
 - `ai-quota-monitor.postman_environment.json`: the variables the requests use, with empty values.
 
-Import both files in Postman (**Import** → drop the two files), select the `ai-quota-monitor` environment and fill in `url` (for example `http://localhost:8080`), `COLLECTOR_TOKEN` and, if you enabled the login, `username` and `password`. The login and refresh requests save `access_token` and `refresh_token` in the environment automatically. Keep your values in Postman; do not commit them.
+Import both files in Postman (**Import** → drop the two files), select the `ai-quota-monitor` environment and fill in `url` (for example `http://localhost:8080`), `COLLECTOR_TOKEN` and, if you enabled the panel login, `username` and `password`. The login and refresh requests save `access_token` and `refresh_token` in the environment automatically. Keep your values in Postman; do not commit them.
 
 ## Documentation
 
+- [Web panel](docs/panel.md)
 - [Contract and endpoints](docs/api.md)
 - [Postman collection and environment](docs/collections/)
 - [Local setup and variables](docs/local-setup.md)
@@ -106,7 +118,7 @@ Import both files in Postman (**Import** → drop the two files), select the `ai
 - [Enclosure and 3D printing](enclosure/README.md)
 - [Roadmap](docs/roadmap.md)
 
-JSON configuration lives in `server/configs/`; secrets in `server/.env` or environment variables. This first version uses only the Go standard library. Mock mode lets you develop without hardware.
+JSON configuration lives in `server/configs/`; secrets in `server/.env` or environment variables. The server uses only the Go standard library; the panel vendors Alpine.js. Mock mode lets you develop without hardware.
 
 ## Contributing
 

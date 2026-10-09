@@ -1,0 +1,69 @@
+{
+  "nav": { "label": "Secciones", "dashboard": "Servicios", "display": "Display", "settings": "Configuración", "logout": "Cerrar sesión" },
+  "common": {
+    "language": "Idioma", "loading": "Cargando…", "refresh": "Actualizar", "refreshing": "Actualizando…",
+    "mock": "EJEMPLO", "updated": "Última actualización: {time}", "never": "Sin actualizaciones todavía", "checked": "Consultado: {time}"
+  },
+  "scope": { "personal": "Personal", "work": "Trabajo" },
+  "login": {
+    "title": "Iniciar sesión", "intro": "Ingresá con el usuario del panel.", "username": "Usuario", "password": "Contraseña",
+    "submit": "Entrar", "busy": "Entrando…", "required": "Completá usuario y contraseña.",
+    "invalid": "Usuario o contraseña incorrectos.", "rate": "Demasiados intentos fallidos. Probá de nuevo en {minutes} min.",
+    "disabled": "El login del panel no está configurado en el servidor.", "expired": "La sesión venció. Iniciá sesión de nuevo."
+  },
+  "status": {
+    "ok": "Al día", "stale": "Desactualizado", "auth_required": "Falta sesión", "unavailable": "Sin datos", "unknown": "Desconocido",
+    "hint": {
+      "stale": "Se muestran los últimos datos conocidos: la última consulta falló o ya pasó la renovación.",
+      "auth_required": "Falta iniciar sesión o cargar la credencial de esta cuenta. Revisá Configuración.",
+      "unavailable": "La consulta al proveedor falló y no hay datos anteriores."
+    }
+  },
+  "quota": {
+    "usedPercent": "{used}% usado", "leftPercent": "{left}% disponible",
+    "usedOf": "{used} de {limit} usados", "left": "{left} disponibles", "usedOnly": "{used} usados",
+    "unknown": "Sin dato", "exhausted": "Agotado", "resets": "Renueva: {time}",
+    "unit": { "credits": "créditos", "tokens": "tokens" }
+  },
+  "dashboard": {
+    "title": "Servicios", "note": "El estado de cada cuenta sale de su última consulta al proveedor.",
+    "noAccounts": "No hay cuentas configuradas en este grupo.", "noData": "Todavía no hay cupos para mostrar."
+  },
+  "display": {
+    "title": "Display", "note": "Vista previa del contenido previsto para la pantalla del ESP32 (172 × 320 px), con los datos reales de la API.",
+    "page": "Página", "scale": "Escala", "rotate": "Alternar cada 10 s", "screen": "Pantalla del dispositivo",
+    "noAccounts": "Sin cuentas", "noData": "Sin datos", "updated": "Act. {time}"
+  },
+  "settings": {
+    "title": "Configuración", "loginStatus": "Estado del login:", "check": "Consultar estado", "openAuth": "Abrir página de autorización",
+    "expires": "Vence: {time}", "storageOff": "El servidor no tiene MASTER_KEY: no se pueden guardar credenciales desde el panel. Las variables de entorno siguen funcionando.",
+    "subtitle": "{provider} · {scope}",
+    "codex": {
+      "intro": "Iniciá sesión con tu cuenta de ChatGPT. La sesión queda guardada en el servidor.",
+      "start": "Iniciar login", "code": "Código para ingresar en la página", "started": "Abrí la página de autorización e ingresá el código.",
+      "done": "Sesión iniciada. Los cupos se actualizan en unos segundos."
+    },
+    "claude": {
+      "warning": "Experimental: los términos de Anthropic no permiten este uso de la suscripción. El riesgo es sobre tu cuenta.",
+      "start": "Iniciar login", "code": "Código que muestra la página (codigo#estado)", "send": "Enviar código",
+      "started": "Abrí la página de autorización, autorizá y pegá el código acá.", "codeRequired": "Pegá el código completo.",
+      "done": "Sesión iniciada. Los cupos se actualizan en unos segundos."
+    },
+    "credential": {
+      "state": "Credencial:", "stored": "Configurada (guardada cifrada en el servidor)", "env": "Configurada (variable de entorno)", "missing": "No configurada",
+      "field": { "openrouter": "Management key de OpenRouter", "cursor": "Cookie WorkosCursorSessionToken", "default": "Credencial" },
+      "save": "Guardar", "replace": "Reemplazar", "saving": "Guardando…", "required": "Pegá la credencial antes de guardar.",
+      "saved": "Credencial guardada. Los cupos se actualizan en unos segundos.",
+      "note": "El valor guardado nunca se muestra. Lo guardado desde el panel tiene prioridad sobre la variable de entorno."
+    },
+    "plain": { "mock": "Cuenta de ejemplo: no necesita configuración.", "collector": "Los datos de esta cuenta los envía un recolector externo.", "none": "Esta cuenta no se configura desde el panel." },
+    "login": { "unknown": "Sin consultar", "starting": "Iniciando…", "pending": "Esperando autorización", "authenticated": "Sesión activa", "auth_required": "Falta iniciar sesión", "failed": "Falló" }
+  },
+  "provider": { "openai": "Codex (ChatGPT)", "openrouter": "OpenRouter", "cursor": "Cursor", "anthropic": "Claude", "kiro": "Kiro" },
+  "errors": {
+    "network": "No se pudo conectar con el servidor.", "server": "El servidor respondió con un error ({status}).",
+    "rate": "Demasiados intentos. Esperá unos minutos.", "disabled": "Esta función está deshabilitada en el servidor.",
+    "notFound": "El servidor no reconoce esta cuenta.", "busy": "La cuenta está ocupada o el login venció. Probá de nuevo.",
+    "invalid": "El servidor rechazó el valor enviado.", "provider": "El proveedor no respondió correctamente."
+  }
+}

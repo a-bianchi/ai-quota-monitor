@@ -10,7 +10,8 @@ Cada cuenta define `id`, `name`, `provider`, `scope`, `source` y, para OpenRoute
 |---|---|
 | `DEVICE_TOKEN` | Obligatoria, mínimo 32 caracteres; lectura de métricas |
 | `COLLECTOR_TOKEN` | Opcional; si se define, mínimo 32 caracteres y distinto del anterior |
-| `AUTH_USERNAME`, `AUTH_PASSWORD` | Opcionales, van juntas; habilitan `POST /auth/login`. Contraseña de 8+ caracteres; requieren `COLLECTOR_TOKEN` |
+| `AUTH_USERNAME`, `AUTH_PASSWORD_HASH` | Opcionales, van juntas; habilitan el [panel web](panel.es.md). El hash sale de `make panel-password`; nunca la contraseña en texto plano |
+| `MASTER_KEY` | Opcional, 32+ caracteres; cifra las credenciales de proveedores guardadas desde el panel |
 | `HTTP_HOST` | `127.0.0.1` sin Docker; Compose usa `0.0.0.0` dentro del contenedor |
 | `HTTP_PORT` | `8080`; en Compose configura el puerto del host |
 | `HOST_BIND` | Solo Compose: `127.0.0.1` para acceso local |
@@ -19,7 +20,7 @@ Cada cuenta define `id`, `name`, `provider`, `scope`, `source` y, para OpenRoute
 | `DATA_DIR` | Binario: `./data`; Compose: `/data` con volumen persistente |
 | `POLL_INTERVAL` | `5m`; duración Go, mínimo 1s |
 | `STALE_AFTER` | `15m`; debe ser >= intervalo |
-| `OPENROUTER_PERSONAL_KEY` | Management key, solo para configuración live |
+| `OPENROUTER_PERSONAL_KEY` | Management key, solo para configuración live. Respaldo: una key guardada desde el panel tiene prioridad |
 | `CURSOR_WORK_SESSION` | Cookie de sesión de cursor.com, solo para configuración live; ver [Cursor](providers/cursor.es.md) |
 
 ## OpenRouter real con Compose

@@ -3,7 +3,7 @@ ifeq ($(shell uname -s),Darwin)
 GO_LDFLAGS ?= -linkmode=external
 endif
 
-.PHONY: test run build build-collector codex-login collect-codex collect-codex-once docker-up docker-down
+.PHONY: test run build panel-password build-collector codex-login collect-codex collect-codex-once docker-up docker-down
 test:
 	cd server && go test -race -ldflags="$(GO_LDFLAGS)" ./...
 run: build
@@ -13,6 +13,10 @@ build:
 ifeq ($(shell uname -s),Darwin)
 	codesign --force --sign - server/bin/ai-quota-monitor
 endif
+
+# Asks for the panel password and prints the AUTH_PASSWORD_HASH line for server/.env.
+panel-password: build
+	@server/bin/ai-quota-monitor hash-password
 
 docker-up:
 	docker compose --env-file server/.env up --build -d
