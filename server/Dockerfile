@@ -18,4 +18,7 @@ WORKDIR /app
 COPY configs /app/configs
 USER app
 EXPOSE 8080
+# The image has no curl; Node is already there for Codex.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["node", "-e", "fetch('http://127.0.0.1:8080/ping').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
 ENTRYPOINT ["server"]

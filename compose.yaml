@@ -7,6 +7,8 @@ services:
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 8080
+      # Codex may write under HOME; the root filesystem is read-only.
+      HOME: /tmp
       CONFIG_NAME: ${CONFIG_NAME:-config.json}
       MOCK_FILE: /app/configs/mock-usage.json
       DATA_DIR: /data

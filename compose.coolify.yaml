@@ -1,0 +1,35 @@
+# Coolify: the platform proxy routes to the container, so no host port is
+# published, and the configurations come from the image instead of a bind mount.
+services:
+  api:
+    build: ./server
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8080
+      # Codex may write under HOME; the root filesystem is read-only.
+      HOME: /tmp
+      CONFIG_NAME: ${CONFIG_NAME:-config.live.json}
+      MOCK_FILE: /app/configs/mock-usage.json
+      DATA_DIR: /data
+      DEVICE_TOKEN: ${DEVICE_TOKEN:?Set DEVICE_TOKEN}
+      COLLECTOR_TOKEN: ${COLLECTOR_TOKEN:-}
+      AUTH_USERNAME: ${AUTH_USERNAME:-}
+      AUTH_PASSWORD_HASH: ${AUTH_PASSWORD_HASH:-}
+      MASTER_KEY: ${MASTER_KEY:-}
+      CODEX_BIN: codex
+      POLL_INTERVAL: ${POLL_INTERVAL:-5m}
+      STALE_AFTER: ${STALE_AFTER:-15m}
+      OPENROUTER_PERSONAL_KEY: ${OPENROUTER_PERSONAL_KEY:-}
+      CURSOR_WORK_SESSION: ${CURSOR_WORK_SESSION:-}
+    volumes:
+      - usage-data:/data
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+volumes:
+  usage-data:

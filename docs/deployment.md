@@ -38,7 +38,7 @@ Reach the panel over HTTPS whenever it is not on a trusted network. `HOST_BIND` 
 
 ## Coolify or cloud
 
-You can deploy `compose.yaml` from Git, set the variables in the panel and keep the volume. Point the platform's proxy at the container's port 8080; this may require removing the `ports` mapping from Compose. No real Coolify deployment has been tested yet.
+For Coolify, deploy `compose.coolify.yaml` from Git (Docker Compose build pack, with that file as the Compose location), set the variables in the panel and keep the volume. It publishes no host port, because Coolify's proxy already uses 8080, and takes the configurations from the image instead of mounting `server/configs`. Assign the domain to the `api` service on container port 8080. `CONFIG_NAME` defaults to `config.live.json` there. The image's health check calls `GET /ping`. No real Coolify deployment has been tested yet.
 
 For connections outside a trusted network, publish HTTPS behind a proxy with a valid certificate. The read/ingestion tokens are still required. Do not open the HTTP port directly to the Internet. The firmware will have to validate the TLS certificate.
 
