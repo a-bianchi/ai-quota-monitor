@@ -1,21 +1,21 @@
-# Despliegue
+# Deployment
 
-[English](deployment.en.md) · **Español**
+**English** · [Español](deployment.es.md)
 
 ## Docker Compose / homelab
 
-Seguí el README. El volumen `usage-data` conserva las observaciones entre reinicios; `docker compose --env-file server/.env down -v` lo elimina. Los datos se guardan por combinación fuente/cuenta: cambiar de mock a real no reutiliza datos ficticios.
+Follow the README. The `usage-data` volume keeps observations across restarts; `docker compose --env-file server/.env down -v` deletes it. Data is stored per source/account combination: switching from mock to real does not reuse fictitious data.
 
-Para que el ESP32 acceda desde tu LAN, configurá `HOST_BIND` con la IP LAN del servidor o `0.0.0.0` y recreá el servicio. Usá firewall para limitar acceso a tu red. El valor por defecto solo permite conexiones locales.
+For the ESP32 to reach the server from your LAN, set `HOST_BIND` to the server's LAN IP or `0.0.0.0` and recreate the service. Use a firewall to limit access to your network. The default value only allows local connections.
 
-Con Go local y con Docker se utiliza `CONFIG_NAME` y los archivos de `server/configs/`. El Dockerfile incluye las configuraciones, y Compose monta ese directorio para permitir cambios sin reconstruir la imagen. `.env` queda excluido de la imagen; los secretos se inyectan por entorno.
+Both local Go and Docker use `CONFIG_NAME` and the files in `server/configs/`. The Dockerfile includes the configurations, and Compose mounts that directory so they can be changed without rebuilding the image. `.env` is excluded from the image; secrets are injected through the environment.
 
-## Coolify o nube
+## Coolify or cloud
 
-Se puede desplegar `compose.yaml` desde Git, configurar las variables en el panel y conservar el volumen. Configurá el proxy de la plataforma hacia el puerto 8080 del contenedor; puede requerir quitar el mapeo `ports` de Compose. No se probó un despliegue real en Coolify todavía.
+You can deploy `compose.yaml` from Git, set the variables in the panel and keep the volume. Point the platform's proxy at the container's port 8080; this may require removing the `ports` mapping from Compose. No real Coolify deployment has been tested yet.
 
-Para conexiones fuera de una red confiable, publicá HTTPS detrás de un proxy con certificado válido. Los tokens de lectura/ingestión siguen siendo obligatorios. No abrir el puerto HTTP directamente a Internet. El firmware deberá validar el certificado TLS.
+For connections outside a trusted network, publish HTTPS behind a proxy with a valid certificate. The read/ingestion tokens are still required. Do not open the HTTP port directly to the Internet. The firmware will have to validate the TLS certificate.
 
-El servidor no necesita modelos de IA ni GPU; consulta datos de consumo. Codex corre en el propio servidor. Su sesión se autoriza desde un navegador mediante código y se guarda en /data/codex. No depende de la Mac. El volumen contiene credenciales: respaldarlo y restringir acceso. La imagen incluye Node/Codex, por eso es mayor que una imagen de Go puro.
+The server needs no AI models or GPU; it queries usage data. Codex runs on the server itself. Its session is authorized from a browser with a code and stored in /data/codex. It does not depend on your Mac. The volume contains credentials: back it up and restrict access. The image includes Node/Codex, which is why it is larger than a pure Go image.
 
-Persistencia: un único proceso con archivo JSON atómico. No escalar a varias réplicas sobre el mismo archivo; una futura implementación compartida necesitará otra estrategia. Respaldar el volumen si necesitás conservar datos. No almacena historial, solo la última observación por cuenta.
+Persistence: a single process with an atomic JSON file. Do not scale to several replicas over the same file; a future shared implementation will need another strategy. Back up the volume if you need to keep the data. It stores no history, only the latest observation per account.

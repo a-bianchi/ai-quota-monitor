@@ -1,6 +1,6 @@
 # How to connect each provider
 
-**English** · [Español](conectar.md)
+**English** · [Español](connect.es.md)
 
 Step-by-step guide. Each provider is connected only once; after that the server queries on its own every `POLL_INTERVAL` (5 minutes by default).
 
@@ -86,7 +86,7 @@ No credential is pasted: you sign in from your browser and the server stores the
 
 To have both personal and work, repeat the steps with each ID (`codex-personal`, `codex-work`). The ID does not check which account you chose in the browser: use different profiles or a private window so they do not get mixed up.
 
-If your organization restricts device-code login, step 3 may fail; that is up to the administrator. More detail in [codex.en.md](codex.en.md).
+If your organization restricts device-code login, step 3 may fail; that is up to the administrator. More detail in [codex.md](codex.md).
 
 ## Cursor
 
@@ -117,13 +117,13 @@ Keep in mind:
 - Signing out of cursor.com may invalidate it earlier.
 - Some Enterprise accounts expose no meter with a limit; in that case it stays `unavailable`.
 
-For a second account, add another entry with another variable (for example `CURSOR_PERSONAL_SESSION`) and, if you use Docker, add it to `compose.yaml` as well. More detail in [cursor.en.md](cursor.en.md).
+For a second account, add another entry with another variable (for example `CURSOR_PERSONAL_SESSION`) and, if you use Docker, add it to `compose.yaml` as well. More detail in [cursor.md](cursor.md).
 
 ## Claude (subscription)
 
 Shows the 5-hour and 7-day windows of Claude Pro/Max.
 
-**Before using it:** Anthropic's terms do not permit a third-party application to sign in with Claude.ai or store its tokens, and that is what this provider does. The risk is on your account. Read the [full warning](claude-subscription.en.md).
+**Before using it:** Anthropic's terms do not permit a third-party application to sign in with Claude.ai or store its tokens, and that is what this provider does. The risk is on your account. Read the [full warning](claude-subscription.md).
 
 1. The account in the configuration:
 
@@ -150,7 +150,7 @@ Shows the 5-hour and 7-day windows of Claude Pro/Max.
 
 5. Verify with `GET /usage`. Expected: `five-hour` and `seven-day` quotas in `percent`.
 
-The server renews the session by itself. If it goes to `auth_required`, repeat steps 2 to 4. More detail in [claude-subscription.en.md](claude-subscription.en.md).
+The server renews the session by itself. If it goes to `auth_required`, repeat steps 2 to 4. More detail in [claude-subscription.md](claude-subscription.md).
 
 ## Security
 

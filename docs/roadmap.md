@@ -1,33 +1,33 @@
 # Roadmap
 
-[English](roadmap.en.md) · **Español**
+**English** · [Español](roadmap.es.md)
 
-## Implementado
+## Implemented
 
-- Servidor Go sin dependencias externas.
-- GET /usage con filtro personal/trabajo y Bearer token.
-- Modo de ejemplo con seis cuentas.
-- Cliente API OpenRouter con errores y timeout.
-- Ingestión de observaciones para cuentas collector.
-- Persistencia de última observación y detección de datos viejos.
-- Docker Compose, documentación y CI de Go.
-- Codex en el servidor: login HTTP por device code, perfiles aislados y polling automático.
+- Go server without external dependencies.
+- GET /usage with personal/work filter and Bearer token.
+- Example mode with six accounts.
+- OpenRouter API client with errors and timeout.
+- Ingestion of observations for collector accounts.
+- Persistence of the latest observation and stale-data detection.
+- Docker Compose, documentation and Go CI.
+- Codex on the server: HTTP device-code login, isolated profiles and automatic polling.
 
-## Próximo
+## Next
 
-1. Validar OpenRouter con una management key propia.
-2. Validar login y cupos reales de ambas cuentas con el login HTTP implementado.
-3. Implementar firmware y validar LCD/Wi-Fi/TLS en la placa real.
-4. Validar Cursor con una sesión real; evaluar acceso sin admin en Kiro.
-5. Validar Claude con una cuenta real; reemplazarlo si Anthropic publica una vía oficial.
-6. Diseñar, imprimir y verificar carcasa.
+1. Validate OpenRouter with your own management key.
+2. Validate real login and quotas of both accounts with the implemented HTTP login.
+3. Implement the firmware and validate LCD/Wi-Fi/TLS on the real board.
+4. Validate Cursor with a real session; evaluate non-admin access in Kiro.
+5. Validate Claude with a real account; replace it if Anthropic publishes an official path.
+6. Design, print and verify the enclosure.
 
-## Decisiones abiertas
+## Open decisions
 
-- Toolchain del firmware y librería de UI.
-- Frescura por cupo si hay observaciones independientes.
-- Tokens individuales por recolector y permisos por cuenta.
-- Modelo paramétrico de carcasa (OpenSCAD o CAD equivalente).
-- Dashboard web para previsualizar la pantalla.
+- Firmware toolchain and UI library.
+- Per-quota freshness if there are independent observations.
+- Individual tokens per collector and per-account permissions.
+- Parametric enclosure model (OpenSCAD or equivalent CAD).
+- Web dashboard to preview the screen.
 
-El backend todavía no tuvo despliegue real ni pruebas con cuentas reales. No hay instrucciones de montaje físico validadas.
+The backend has not had a real deployment or tests with real accounts yet. There are no validated physical assembly instructions.

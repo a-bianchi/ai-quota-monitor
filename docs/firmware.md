@@ -1,20 +1,20 @@
-# Firmware y pantalla — pendiente
+# Firmware and display — pending
 
-[English](firmware.en.md) · **Español**
+**English** · [Español](firmware.es.md)
 
-Destino: `firmware/esp32-c6-lcd-1.47/`. No hay firmware compilable todavía. Elegir y verificar toolchain/librerías compatibles con ESP32-C6 y ST7789 antes de implementar; usar los ejemplos oficiales Waveshare como referencia.
+Target: `firmware/esp32-c6-lcd-1.47/`. There is no buildable firmware yet. Choose and verify a toolchain and libraries compatible with the ESP32-C6 and ST7789 before implementing; use the official Waveshare examples as a reference.
 
-Configuración prevista: SSID, contraseña Wi-Fi, URL de API, token de lectura y zona horaria. Mantener esos valores fuera del repo. Las credenciales del proveedor no deben ir en el ESP32.
+Planned configuration: SSID, Wi-Fi password, API URL, read token and time zone. Keep those values out of the repo. Provider credentials must not go on the ESP32.
 
-Diseño:
+Design:
 
-- PERSONAL en celeste y TRABAJO en violeta.
-- Rotación automática cada 10s; sin botones táctiles ficticios.
-- Una tarjeta por servicio, con saldo restante, cupos separados y renovación.
-- OpenRouter en USD, sin barra mensual ni renovación inventada.
-- Última actualización visible, distinto de la hora de lectura.
-- Indicar MOCK cuando `source=mock`.
-- Manejar `null`, stale, auth_required, unavailable y falta de Wi-Fi.
-- LED RGB opcional para saldo bajo; umbrales configurables.
+- PERSONAL in light blue and WORK in violet.
+- Automatic rotation every 10s; no fake touch buttons.
+- One card per service, with remaining balance, separate quotas and reset time.
+- OpenRouter in USD, without a monthly bar or an invented reset.
+- Last update visible, distinct from the read time.
+- Show MOCK when `source=mock`.
+- Handle `null`, stale, auth_required, unavailable and missing Wi-Fi.
+- Optional RGB LED for low balance; configurable thresholds.
 
-Validar legibilidad real en 172 × 320: simplificar o paginar si tres tarjetas resultan densas. Mostrar renovación por ventana o indicar claramente a cuál corresponde. El firmware debe validar TLS en conexiones HTTPS y mantener refresco HTTP separado del refresco gráfico.
+Validate real legibility at 172 × 320: simplify or paginate if three cards turn out dense. Show the reset per window or state clearly which one it refers to. The firmware must validate TLS on HTTPS connections and keep the HTTP refresh separate from the screen refresh.

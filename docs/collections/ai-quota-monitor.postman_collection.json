@@ -1,0 +1,383 @@
+{
+	"info": {
+		"_postman_id": "1ab2c38b-b38c-40f4-a5c5-dd34cd605580",
+		"name": "ai-quota-monitor",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4404886"
+	},
+	"item": [
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\n    var jsonData = pm.response.json();\n        pm.environment.set(\"access_token\", jsonData.accessToken);\n        pm.environment.set(\"refresh_token\", jsonData.refreshToken);\n}\n"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/auth/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "refresh",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\n    var jsonData = pm.response.json();\n        pm.environment.set(\"access_token\", jsonData.accessToken);\n        pm.environment.set(\"refresh_token\", jsonData.refreshToken);\n}"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/auth/refresh",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"refresh"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get usage",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Timezone",
+						"value": "America/Argentina/Buenos_Aires"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/usage",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"usage"
+					],
+					"query": [
+						{
+							"key": "scope",
+							"value": "work",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chatgpt login (personal) Copy",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/accounts/codex-personal/codex/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"codex-personal",
+						"codex",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chatgpt login status (personal)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/accounts/codex-personal/codex/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"codex-personal",
+						"codex",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chatgpt login (work)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/accounts/codex-work/codex/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"codex-work",
+						"codex",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chatgpt login satus (work)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/accounts/codex-work/codex/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"codex-work",
+						"codex",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "claude login (personal)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/accounts/claude-personal/claude/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"claude-personal",
+						"claude",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "claude login (personal)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"code#state\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/accounts/claude-personal/claude/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"claude-personal",
+						"claude",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "claude login status (personal)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{COLLECTOR_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"codigo#estado\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/accounts/claude-personal/claude/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"accounts",
+						"claude-personal",
+						"claude",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "json_web_token_0pvi",
+			"secret": true
+		}
+	]
+}

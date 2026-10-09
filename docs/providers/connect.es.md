@@ -1,6 +1,6 @@
 # Cómo conectar cada proveedor
 
-[English](conectar.en.md) · **Español**
+[English](connect.md) · **Español**
 
 Guía paso a paso. Cada proveedor se conecta una sola vez; después el servidor consulta solo cada `POLL_INTERVAL` (5 minutos por defecto).
 
@@ -86,7 +86,7 @@ No se pega ninguna credencial: iniciás sesión desde tu navegador y el servidor
 
 Para tener personal y laboral, repetí los pasos con cada ID (`codex-personal`, `codex-work`). El ID no comprueba qué cuenta elegiste en el navegador: usá perfiles distintos o una ventana privada para no cruzarlas.
 
-Si tu organización restringe el login por código de dispositivo, el paso 3 puede fallar; eso lo decide el administrador. Más detalle en [codex.md](codex.md).
+Si tu organización restringe el login por código de dispositivo, el paso 3 puede fallar; eso lo decide el administrador. Más detalle en [codex.es.md](codex.es.md).
 
 ## Cursor
 
@@ -117,13 +117,13 @@ A tener en cuenta:
 - Cerrar sesión en cursor.com puede invalidarla antes.
 - Algunas cuentas Enterprise no exponen ningún medidor con límite; en ese caso queda `unavailable`.
 
-Para una segunda cuenta, agregá otra entrada con otra variable (por ejemplo `CURSOR_PERSONAL_SESSION`) y, si usás Docker, sumala también en `compose.yaml`. Más detalle en [cursor.md](cursor.md).
+Para una segunda cuenta, agregá otra entrada con otra variable (por ejemplo `CURSOR_PERSONAL_SESSION`) y, si usás Docker, sumala también en `compose.yaml`. Más detalle en [cursor.es.md](cursor.es.md).
 
 ## Claude (suscripción)
 
 Muestra las ventanas de 5 horas y 7 días de Claude Pro/Max.
 
-**Antes de usarlo:** los términos de Anthropic no permiten que una aplicación de terceros inicie sesión con Claude.ai ni guarde sus tokens, y eso es lo que hace este provider. El riesgo es sobre tu cuenta. Leé la [advertencia completa](claude-subscription.md).
+**Antes de usarlo:** los términos de Anthropic no permiten que una aplicación de terceros inicie sesión con Claude.ai ni guarde sus tokens, y eso es lo que hace este provider. El riesgo es sobre tu cuenta. Leé la [advertencia completa](claude-subscription.es.md).
 
 1. La cuenta en la configuración:
 
@@ -150,7 +150,7 @@ Muestra las ventanas de 5 horas y 7 días de Claude Pro/Max.
 
 5. Verificá con `GET /usage`. Esperado: cupos `five-hour` y `seven-day` en `percent`.
 
-El servidor renueva la sesión solo. Si pasa a `auth_required`, repetí los pasos 2 a 4. Más detalle en [claude-subscription.md](claude-subscription.md).
+El servidor renueva la sesión solo. Si pasa a `auth_required`, repetí los pasos 2 a 4. Más detalle en [claude-subscription.es.md](claude-subscription.es.md).
 
 ## Seguridad
 

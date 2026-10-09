@@ -1,7 +1,7 @@
-# Carcasa — pendiente de diseño
+# Enclosure — design pending
 
-[English](README.en.md) · **Español**
+**English** · [Español](README.es.md)
 
-Se publicarán fuente editable en `source/` y STL en `stl/` cuando el modelo esté diseñado y probado. No se incluyen STL ficticios ni dimensiones asumidas.
+Editable sources will be published in `source/` and STL files in `stl/` once the model is designed and tested. No fictitious STL files or assumed dimensions are included.
 
-Requisitos: acceso USB-C, BOOT/RESET, ventilación, pantalla sin presión, soporte de escritorio y método de fijación. Medir placa, conectores, tolerancias y revisar planos oficiales. Imprimir una prueba de encastre antes de publicar versión lista para replicar. Documentar material, orientación, capas, soportes y tornillos según diseño final.
+Requirements: access to USB-C and BOOT/RESET, ventilation, no pressure on the display, a desk stand and a fastening method. Measure the board, connectors and tolerances, and review the official drawings. Print a fit test before publishing a version ready to replicate. Document material, orientation, layers, supports and screws according to the final design.

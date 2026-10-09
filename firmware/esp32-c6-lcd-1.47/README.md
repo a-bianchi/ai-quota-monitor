@@ -1,5 +1,5 @@
-# Firmware pendiente
+# Firmware pending
 
-[English](README.en.md) · **Español**
+**English** · [Español](README.es.md)
 
-Esta carpeta reserva el destino del firmware; no contiene un programa para flashear. Ver [diseño y requisitos](../../docs/firmware.md).
+This folder reserves the place for the firmware; it does not contain a program to flash. See [design and requirements](../../docs/firmware.md).

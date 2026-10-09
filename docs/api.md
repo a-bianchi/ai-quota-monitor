@@ -1,45 +1,47 @@
 # API v1
 
-[English](api.en.md) · **Español**
+**English** · [Español](api.es.md)
 
-## Login con usuario y contraseña
+A ready-to-import Postman collection and environment for these endpoints live in [`docs/collections/`](collections/).
 
-Opcional. Se habilita definiendo `AUTH_USERNAME` y `AUTH_PASSWORD` (8+ caracteres) junto con `COLLECTOR_TOKEN`; sin ellas, estos endpoints responden 503. `DEVICE_TOKEN` y `COLLECTOR_TOKEN` siguen funcionando igual.
+## Login with username and password
 
-`POST /auth/login`, sin `Authorization`:
+Optional. Enabled by setting `AUTH_USERNAME` and `AUTH_PASSWORD` (8+ characters) together with `COLLECTOR_TOKEN`; without them, these endpoints answer 503. `DEVICE_TOKEN` and `COLLECTOR_TOKEN` keep working the same way.
+
+`POST /auth/login`, without `Authorization`:
 
 ```json
-{"username": "tu_usuario", "password": "tu_contraseña"}
+{"username": "your_username", "password": "your_password"}
 ```
 
-Respuesta 200:
+200 response:
 
 ```json
 {"tokenType": "Bearer", "accessToken": "<jwt>", "expiresIn": 900, "refreshToken": "<jwt>"}
 ```
 
-`POST /auth/refresh` con `{"refreshToken": "<jwt>"}` devuelve la misma forma, con tokens nuevos.
+`POST /auth/refresh` with `{"refreshToken": "<jwt>"}` returns the same shape, with new tokens.
 
-- `accessToken` dura 15 minutos y se usa como `Authorization: Bearer <accessToken>`. Da los mismos permisos que `COLLECTOR_TOKEN`: leer `/usage`, ingresar datos e iniciar logins de proveedores.
-- `refreshToken` dura 30 días y solo sirve para `/auth/refresh`.
-- 401 si las credenciales o el refresh token son inválidos o vencieron; 400 si el JSON es inválido.
+- `accessToken` lasts 15 minutes and is used as `Authorization: Bearer <accessToken>`. It grants the same permissions as `COLLECTOR_TOKEN`: reading `/usage`, ingesting data and starting provider logins.
+- `refreshToken` lasts 30 days and only works for `/auth/refresh`.
+- 401 if the credentials or the refresh token are invalid or expired; 400 if the JSON is invalid.
 
-Los tokens son JWT firmados (HS256) y el servidor no los guarda: siguen valiendo después de reiniciar. No hay cierre de sesión ni revocación individual; para invalidar todos, cambiá `AUTH_PASSWORD` o `COLLECTOR_TOKEN`. Un login fallido demora un segundo en responder; no hay bloqueo por intentos, así que usá una contraseña fuerte y HTTPS si la API sale de tu red.
+The tokens are signed JWTs (HS256) and the server does not store them: they remain valid after a restart. There is no logout or per-token revocation; to invalidate all of them, change `AUTH_PASSWORD` or `COLLECTOR_TOKEN`. A failed login takes one second to answer; there is no lockout after repeated attempts, so use a strong password and HTTPS if the API leaves your network.
 
-## Lectura
+## Reading
 
-`GET /usage`, con `Authorization: Bearer DEVICE_TOKEN`. También acepta `COLLECTOR_TOKEN`, para poder probar todo con un solo token desde Postman. Filtro opcional `?scope=personal` o `?scope=work`. `GET /healthz` es público y solo indica que el proceso HTTP responde; no garantiza que los proveedores estén disponibles.
+`GET /usage`, with `Authorization: Bearer DEVICE_TOKEN`. It also accepts `COLLECTOR_TOKEN`, so everything can be tested with a single token from Postman. Optional filter `?scope=personal` or `?scope=work`. `GET /healthz` is public and only indicates that the HTTP process responds; it does not guarantee that the providers are available.
 
-Encabezados opcionales:
+Optional headers:
 
-| Encabezado | Valores | Sin encabezado |
+| Header | Values | Without the header |
 |---|---|---|
-| `X-Timezone` | Zona IANA, por ejemplo `Europe/Madrid` o `UTC` | `America/Argentina/Buenos_Aires` (UTC-3) |
-| `Accept-Language` | `es` o `en` | `es` |
+| `X-Timezone` | IANA zone, for example `Europe/Madrid` or `UTC` | `America/Argentina/Buenos_Aires` (UTC-3) |
+| `Accept-Language` | `es` or `en` | `es` |
 
-`X-Timezone` convierte `generatedAt`, `updatedAt` y `resetsAt` a esa zona; el instante es el mismo, cambia el desplazamiento (`-03:00`, `+02:00`, o `Z` para UTC). Una zona desconocida devuelve 400. `Accept-Language` traduce `quotas[].name`; se usa el primer idioma soportado de la lista y cualquier otro cae en español. Los `id` de los cupos nunca se traducen. Los nombres de cuenta vienen de la configuración y no se traducen, igual que los nombres propios que envíe un recolector.
+`X-Timezone` converts `generatedAt`, `updatedAt` and `resetsAt` to that zone; the instant is the same, only the offset changes (`-03:00`, `+02:00`, or `Z` for UTC). An unknown zone returns 400. `Accept-Language` translates `quotas[].name`; the first supported language in the list is used and anything else falls back to Spanish. Quota `id` values are never translated. Account names come from the configuration and are not translated, and neither are custom names sent by a collector.
 
-Respuesta:
+Response (with `Accept-Language: en`):
 
 ```json
 {
@@ -55,7 +57,7 @@ Respuesta:
     "status": "ok",
     "quotas": [{
       "id": "5h",
-      "name": "5 horas",
+      "name": "5 hours",
       "unit": "percent",
       "used": 11,
       "limit": 100,
@@ -65,25 +67,25 @@ Respuesta:
 }
 ```
 
-Los valores anteriores son ficticios. Fechas RFC3339/ISO 8601, en hora de Argentina (UTC-3) salvo que se pida otra zona con `X-Timezone`. `updatedAt` es la observación del proveedor; `generatedAt` es la generación de esta respuesta. No usar `generatedAt` para inferir frescura.
+The values above are fictitious. Dates are RFC3339/ISO 8601, in Argentina time (UTC-3) unless another zone is requested with `X-Timezone`. `updatedAt` is the provider observation; `generatedAt` is when this response was generated. Do not use `generatedAt` to infer freshness.
 
 - `provider`: `openai`, `cursor`, `kiro`, `openrouter`, `anthropic`.
 - `scope`: `personal`, `work`.
 - `source`: `mock`, `direct`, `collector`.
 - `status`: `ok`, `stale`, `auth_required`, `unavailable`.
 - `unit`: `percent`, `credits`, `usd`, `tokens`.
-- `used`, `limit`, `updatedAt`, `resetsAt` pueden ser `null` cuando corresponda.
-- `quotas` es una lista, vacía cuando todavía no hay datos.
+- `used`, `limit`, `updatedAt`, `resetsAt` may be `null` where applicable.
+- `quotas` is a list, empty while there is no data yet.
 
-Saldo = `limit - used` si ambos existen. Si el consumo supera el límite, mostrar agotado y conservar los valores originales. En porcentajes el límite es 100. No sumar porcentajes de cupos distintos. OpenRouter devuelve créditos acumulados comprados y usados: mostrar saldo USD; ese total no es un cupo mensual ni una barra de suscripción.
+Balance = `limit - used` when both exist. If consumption exceeds the limit, show it as exhausted and keep the original values. For percentages the limit is 100. Do not add up percentages of different quotas. OpenRouter returns accumulated credits purchased and used: show the USD balance; that total is neither a monthly quota nor a subscription bar.
 
-`stale`: pasó `STALE_AFTER`, una ventana ya se renovó o falló una actualización y existen datos anteriores. `auth_required`: clave ausente/rechazada. `unavailable`: sin observación utilizable o error de almacenamiento. Puede haber valores anteriores aun con error: la pantalla debe mostrar su estado.
+`stale`: `STALE_AFTER` elapsed, a window already reset, or an update failed and earlier data exists. `auth_required`: key missing or rejected. `unavailable`: no usable observation or a storage error. Earlier values may still be present with an error: the display must show their status.
 
-El MVP tiene un timestamp/estado por cuenta. Un recolector debe enviar juntos los cupos de una misma observación; datos independientes requerirán extender el contrato.
+The MVP has one timestamp/status per account. A collector must send the quotas of a single observation together; independent data will require extending the contract.
 
-## Ingestión
+## Ingestion
 
-`PUT /accounts/{id}/usage` con `Authorization: Bearer COLLECTOR_TOKEN`:
+`PUT /accounts/{id}/usage` with `Authorization: Bearer COLLECTOR_TOKEN`:
 
 ```json
 {
@@ -92,14 +94,14 @@ El MVP tiene un timestamp/estado por cuenta. Un recolector debe enviar juntos lo
 }
 ```
 
-Solo admite cuentas declaradas con `source: collector`; metadatos de identidad provienen de la configuración, no del payload. Máximo 64 KiB y 16 cupos, IDs únicos y valores finitos no negativos. Rechaza observaciones anteriores al último dato y timestamps futuros con más de un minuto de margen. La lista reemplaza todos los cupos de la cuenta. Respuesta 200 al persistir, 400 payload inválido, 401 token incorrecto, 404 cuenta no ingerible, 409 observación anterior y 503 si la ingestión está deshabilitada.
+Only accounts declared with `source: collector` are accepted; identity metadata comes from the configuration, not from the payload. Maximum 64 KiB and 16 quotas, unique IDs and finite non-negative values. It rejects observations older than the latest data and future timestamps beyond a one-minute margin. The list replaces all quotas of the account. Response 200 when persisted, 400 invalid payload, 401 wrong token, 404 account not ingestible, 409 older observation and 503 if ingestion is disabled.
 
-`COLLECTOR_TOKEN` es compartido por los recolectores de este MVP: puede actualizar todas las cuentas collector. También permite leer `GET /usage`. No usarlo como token del dispositivo. No envíes credenciales de proveedor en el reporte.
+`COLLECTOR_TOKEN` is shared by the collectors of this MVP: it can update every collector account. It also allows reading `GET /usage`. Do not use it as the device token. Do not send provider credentials in the report.
 
-## Login Codex en homelab
+## Codex login on the homelab
 
-POST y GET `/accounts/{id}/codex/login`, con `Authorization: Bearer COLLECTOR_TOKEN`. Solo cuentas provider=openai, source=direct. POST inicia device-code login y devuelve código/URL oficiales; GET informa estado. DEVICE_TOKEN no tiene acceso. Si COLLECTOR_TOKEN está vacío, los endpoints están deshabilitados (503). Ver [flujo](providers/codex.md).
+POST and GET `/accounts/{id}/codex/login`, with `Authorization: Bearer COLLECTOR_TOKEN`. Only accounts with provider=openai, source=direct. POST starts the device-code login and returns the official code/URL; GET reports the status. DEVICE_TOKEN has no access. If COLLECTOR_TOKEN is empty, the endpoints are disabled (503). See the [flow](providers/codex.md).
 
-## Login Claude en homelab
+## Claude login on the homelab
 
-`/accounts/{id}/claude/login`, con `Authorization: Bearer COLLECTOR_TOKEN`. Solo cuentas provider=anthropic, source=direct. POST inicia el login y devuelve `verificationUrl`; PUT con `{"code":"codigo#estado"}` lo completa; GET informa el estado. DEVICE_TOKEN no tiene acceso. Experimental y no permitido por los términos de Anthropic: ver [flujo y advertencia](providers/claude-subscription.md).
+`/accounts/{id}/claude/login`, with `Authorization: Bearer COLLECTOR_TOKEN`. Only accounts with provider=anthropic, source=direct. POST starts the login and returns `verificationUrl`; PUT with `{"code":"code#state"}` completes it; GET reports the status. DEVICE_TOKEN has no access. Experimental and not permitted by Anthropic's terms: see the [flow and warning](providers/claude-subscription.md).

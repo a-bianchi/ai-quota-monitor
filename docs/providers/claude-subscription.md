@@ -1,81 +1,81 @@
-# Claude (suscripción Pro/Max)
+# Claude (Pro/Max subscription)
 
-[English](claude-subscription.en.md) · **Español**
+**English** · [Español](claude-subscription.es.md)
 
-Muestra los límites de la suscripción de Claude: ventana de 5 horas, ventana de 7 días y, si existen, las semanales por modelo. No son créditos de la API de Anthropic.
+Shows the limits of the Claude subscription: 5-hour window, 7-day window and, when present, the per-model weekly ones. These are not Anthropic API credits.
 
-## Advertencia: leer antes de usar
+## Warning: read before using
 
-Estado: **experimental y no permitido por los términos de Anthropic.**
+Status: **experimental and not permitted by Anthropic's terms.**
 
-Anthropic no publica una API para leer los límites de una suscripción. Este provider inicia sesión con el cliente OAuth público de Claude Code y guarda los tokens en el servidor. La [página legal de Claude Code](https://code.claude.com/docs/en/legal-and-compliance) dice que los desarrolladores de terceros no pueden ofrecer login de Claude.ai en sus aplicaciones ni recolectar o guardar credenciales o tokens de sesión de Claude.ai, y que Anthropic puede aplicar esas restricciones sin aviso.
+Anthropic publishes no API to read the limits of a subscription. This provider signs in with the public OAuth client of Claude Code and stores the tokens on the server. The [Claude Code legal page](https://code.claude.com/docs/en/legal-and-compliance) says that third-party developers may not offer Claude.ai login in their applications, nor collect or store Claude.ai credentials or session tokens, and that Anthropic may enforce those restrictions without notice.
 
-Usarlo es tu decisión y el riesgo es sobre tu cuenta. Si no querés asumirlo, borrá la cuenta `anthropic` de tu configuración: el resto del monitor funciona igual.
+Using it is your decision and the risk is on your account. If you do not want to take it, remove the `anthropic` account from your configuration: the rest of the monitor works the same.
 
-Además, el endpoint de uso no está documentado y puede cambiar o dejar de funcionar. La integración se probó solo con endpoints simulados.
+In addition, the usage endpoint is not documented and may change or stop working. The integration was tested only with simulated endpoints.
 
-## Qué consulta
+## What it queries
 
-- Login: autorización OAuth con PKCE, pidiendo solo el permiso `user:profile`. La sesión no sirve para enviar prompts.
-- Uso: `GET https://api.anthropic.com/api/oauth/usage`. No envía prompts ni consume cupo.
+- Login: OAuth authorization with PKCE, requesting only the `user:profile` permission. The session cannot be used to send prompts.
+- Usage: `GET https://api.anthropic.com/api/oauth/usage`. It sends no prompts and consumes no quota.
 
-## Configuración
+## Configuration
 
-En `server/configs/config.live.json`:
+In `server/configs/config.live.json`:
 
 ```json
 {"id":"claude-personal","name":"Claude personal","provider":"anthropic","scope":"personal","source":"direct"}
 ```
 
-Requiere `COLLECTOR_TOKEN`. Reiniciá el servidor después de cambiar la configuración.
+Requires `COLLECTOR_TOKEN`. Restart the server after changing the configuration.
 
-## Login HTTP
+## HTTP login
 
-1. Iniciar:
+1. Start:
 
    ```sh
-   curl -X POST http://TU_SERVIDOR:8080/accounts/claude-personal/claude/login \
-     -H 'Authorization: Bearer TU_COLLECTOR_TOKEN'
+   curl -X POST http://YOUR_SERVER:8080/accounts/claude-personal/claude/login \
+     -H 'Authorization: Bearer YOUR_COLLECTOR_TOKEN'
    ```
 
-   Respuesta `202`:
+   `202` response:
 
    ```json
    {"status":"pending","verificationUrl":"https://claude.com/cai/oauth/authorize?...","expiresAt":"2026-10-09T16:00:00Z"}
    ```
 
-2. Abrí `verificationUrl` en tu navegador, iniciá sesión con la cuenta correcta y autorizá. La página muestra un código con la forma `codigo#estado`.
+2. Open `verificationUrl` in your browser, sign in with the right account and authorize. The page shows a code shaped like `code#state`.
 
-3. Enviar el código completo:
+3. Send the full code:
 
    ```sh
-   curl -X PUT http://TU_SERVIDOR:8080/accounts/claude-personal/claude/login \
-     -H 'Authorization: Bearer TU_COLLECTOR_TOKEN' \
+   curl -X PUT http://YOUR_SERVER:8080/accounts/claude-personal/claude/login \
+     -H 'Authorization: Bearer YOUR_COLLECTOR_TOKEN' \
      -H 'Content-Type: application/json' \
-     -d '{"code":"codigo#estado"}'
+     -d '{"code":"code#state"}'
    ```
 
-   Respuesta `200` con `{"status":"authenticated"}`. El servidor consulta los límites enseguida.
+   `200` response with `{"status":"authenticated"}`. The server queries the limits right away.
 
-4. Estado, cuando quieras: `GET /accounts/claude-personal/claude/login`.
+4. Status, whenever you want: `GET /accounts/claude-personal/claude/login`.
 
-Errores del paso 3: `409` si no hay login en curso o pasaron los 15 minutos, `400` si el código fue rechazado, `502` si falló la comunicación con Claude. En los tres casos se empieza de nuevo con el paso 1.
+Errors in step 3: `409` if there is no login in progress or the 15 minutes passed, `400` if the code was rejected, `502` if the communication with Claude failed. In all three cases start again from step 1.
 
-Estados: `pending`, `authenticated`, `auth_required`, `unknown`. Después de reiniciar el estado es `unknown` hasta la primera lectura; no significa que la sesión se perdió.
+Statuses: `pending`, `authenticated`, `auth_required`, `unknown`. After a restart the status is `unknown` until the first read; it does not mean the session was lost.
 
-## Cupos devueltos
+## Returned quotas
 
-| ID | Significado |
+| ID | Meaning |
 |---|---|
-| `five-hour` | Ventana de 5 horas |
-| `seven-day` | Ventana de 7 días, todos los modelos |
-| `seven-day-opus`, `seven-day-sonnet` | Semanales por modelo, si la respuesta los incluye |
+| `five-hour` | 5-hour window |
+| `seven-day` | 7-day window, all models |
+| `seven-day-opus`, `seven-day-sonnet` | Per-model weekly windows, if the response includes them |
 
-Todos en `percent`, con `resetsAt` cuando Claude lo informa.
+All in `percent`, with `resetsAt` when Claude reports it.
 
-## Persistencia y límites
+## Persistence and limits
 
-- La sesión se guarda en `DATA_DIR/claude/<account-id>/credentials.json`; en Docker, dentro del volumen `usage-data`. Es un secreto: no exponerlo ni subirlo a Git.
-- El servidor renueva la sesión solo. Si la renovación es rechazada, la cuenta pasa a `auth_required` y hay que repetir el login.
-- El ID de la cuenta no verifica con qué cuenta iniciaste sesión en el navegador.
-- No se confirmó con una cuenta real que el permiso `user:profile` alcance para leer el uso.
+- The session is stored in `DATA_DIR/claude/<account-id>/credentials.json`; in Docker, inside the `usage-data` volume. It is a secret: do not expose it or commit it to Git.
+- The server renews the session by itself. If the renewal is rejected, the account goes to `auth_required` and the login has to be repeated.
+- The account ID does not verify which account you signed in with in the browser.
+- It was not confirmed with a real account that the `user:profile` permission is enough to read the usage.

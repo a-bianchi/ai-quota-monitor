@@ -1,24 +1,24 @@
 # Hardware
 
-[English](hardware.en.md) · **Español**
+**English** · [Español](hardware.es.md)
 
-Modelo objetivo: **Waveshare ESP32-C6-LCD-1.47** (no S3 ni versión Touch). Pantalla 172 × 320, controlador ST7789 por SPI, Wi-Fi de 2,4 GHz, LED RGB y microSD. Alimentación USB; no se asumen batería, cargador, IMU ni táctil.
+Target model: **Waveshare ESP32-C6-LCD-1.47** (not the S3 or the Touch version). 172 × 320 display, ST7789 controller over SPI, 2.4 GHz Wi-Fi, RGB LED and microSD. USB powered; no battery, charger, IMU or touch are assumed.
 
-Lista de materiales inicial:
+Initial bill of materials:
 
-- Placa Waveshare ESP32-C6-LCD-1.47.
-- Cable USB-C de datos para programar y alimentar.
-- Puerto USB o fuente compatible.
-- Carcasa impresa, pendiente de diseño y validación.
+- Waveshare ESP32-C6-LCD-1.47 board.
+- USB-C data cable for flashing and power.
+- USB port or compatible power supply.
+- Printed enclosure, pending design and validation.
 
-MicroSD no requerida para el MVP.
+MicroSD is not required for the MVP.
 
-Según la documentación del fabricante, LCD: MOSI GPIO6, SCLK GPIO7, CS GPIO14, DC GPIO15, RST GPIO21, backlight GPIO22; RGB GPIO8. Confirmar contra la revisión física antes de cablear/programar. El fabricante recomienda brillo de 50% o menor para uso prolongado.
+According to the manufacturer's documentation, LCD: MOSI GPIO6, SCLK GPIO7, CS GPIO14, DC GPIO15, RST GPIO21, backlight GPIO22; RGB GPIO8. Confirm against the physical revision before wiring or flashing. The manufacturer recommends 50% brightness or lower for prolonged use.
 
-Fuentes:
+Sources:
 
-- [Documentación Waveshare](https://docs.waveshare.com/ESP32-C6-LCD-1.47)
-- [Producto del fabricante](https://www.waveshare.com/ESP32-C6-LCD-1.47.htm)
-- [Referencia de compra en Argentina](https://www.mercadolibre.com.ar/kit-esp32-c6-con-lcd-147--172320-led-rgb-wifi-6-tarjeta-sd/up/MLAU3223607467)
+- [Waveshare documentation](https://docs.waveshare.com/ESP32-C6-LCD-1.47)
+- [Manufacturer product page](https://www.waveshare.com/ESP32-C6-LCD-1.47.htm)
+- [Purchase reference in Argentina](https://www.mercadolibre.com.ar/kit-esp32-c6-con-lcd-147--172320-led-rgb-wifi-6-tarjeta-sd/up/MLAU3223607467)
 
-La referencia de compra puede cambiar; verificá el modelo en lugar de depender del vendedor. Todavía no se probó el firmware en una placa física.
+The purchase reference may change; check the model instead of relying on the seller. The firmware has not been tested on a physical board yet.

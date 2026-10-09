@@ -1,26 +1,26 @@
 # Cursor
 
-[English](cursor.en.md) · **Español**
+**English** · [Español](cursor.es.md)
 
-Estado: **experimental**. Usa el endpoint que alimenta el panel de uso de cursor.com. No está documentado por Cursor, puede cambiar sin aviso y no se validó todavía con una cuenta real; los tests usan respuestas con la forma reportada por terceros.
+Status: **experimental**. It uses the endpoint that feeds the usage panel on cursor.com. Cursor does not document it and it can change without notice; the tests use responses with the shape reported by third parties.
 
-No requiere ser administrador: lee solo el uso de la cuenta que inició sesión.
+It does not require being an administrator: it only reads the usage of the signed-in account.
 
-## Qué consulta
+## What it queries
 
-`GET https://cursor.com/api/usage-summary`, con la cookie `WorkosCursorSessionToken`. No envía prompts ni consume cupo.
+`GET https://cursor.com/api/usage-summary`, with the `WorkosCursorSessionToken` cookie. It sends no prompts and consumes no quota.
 
-## Configuración
+## Configuration
 
-1. Abrí <https://cursor.com/dashboard> con la cuenta correcta.
-2. DevTools → Application → Cookies → `https://cursor.com` → copiá el valor de `WorkosCursorSessionToken`.
-3. Pegalo en `server/.env`:
+1. Open <https://cursor.com/dashboard> with the right account.
+2. DevTools → Application → Cookies → `https://cursor.com` → copy the value of `WorkosCursorSessionToken`.
+3. Paste it in `server/.env`:
 
 ```env
-CURSOR_WORK_SESSION=valor_de_la_cookie
+CURSOR_WORK_SESSION=cookie_value
 ```
 
-4. Declará la cuenta en `server/configs/`:
+4. Declare the account in `server/configs/`:
 
 ```json
 {
@@ -33,26 +33,26 @@ CURSOR_WORK_SESSION=valor_de_la_cookie
 }
 ```
 
-5. Reiniciá el servidor y consultá `GET /usage`.
+5. Restart the server and query `GET /usage`.
 
-La cookie es una credencial: da acceso a tu cuenta de Cursor. No la subas ni la compartas. Para otra cuenta, agregá otra entrada con otra variable; en Docker Compose también hay que pasarla en `compose.yaml`.
+The cookie is a credential: it gives access to your Cursor account. Do not commit or share it. For another account, add another entry with another variable; with Docker Compose you also have to pass it in `compose.yaml`.
 
-## Cupos devueltos
+## Returned quotas
 
-Todos en `percent`, con `resetsAt` igual al fin del ciclo de facturación:
+All in `percent`, with `resetsAt` equal to the end of the billing cycle:
 
-| ID | Significado | Origen |
+| ID | Meaning | Source |
 |---|---|---|
-| `included` | Uso incluido en el plan | `totalPercentUsed`, o `used/limit` de `individualUsage.plan` u `overall` |
-| `auto` | Porción de modelos Auto | `autoPercentUsed`, si existe |
-| `api` | Porción de modelos elegidos a mano | `apiPercentUsed`, si existe |
-| `on-demand` | Gasto on-demand propio contra su tope | `individualUsage.onDemand`, si está habilitado y tiene límite |
-| `team-on-demand` | Gasto on-demand del equipo contra su tope | `teamUsage.onDemand`, si está habilitado y tiene límite |
+| `included` | Usage included in the plan | `totalPercentUsed`, or `used/limit` from `individualUsage.plan` or `overall` |
+| `auto` | Share from Auto models | `autoPercentUsed`, if present |
+| `api` | Share from manually chosen models | `apiPercentUsed`, if present |
+| `on-demand` | Your own on-demand spend against its cap | `individualUsage.onDemand`, if enabled and it has a limit |
+| `team-on-demand` | Team on-demand spend against its cap | `teamUsage.onDemand`, if enabled and it has a limit |
 
-Solo se informan medidores con límite conocido. Se usan porcentajes porque la unidad de `used`/`limit` no está documentada (pedidos o centavos según el plan); no se convierten a USD.
+Only meters with a known limit are reported. Percentages are used because the unit of `used`/`limit` is not documented (requests or cents depending on the plan); they are not converted to USD.
 
-## Límites conocidos
+## Known limitations
 
-- La sesión vence y no se renueva sola. Cuando pasa, la cuenta queda en `auth_required`: copiá la cookie de nuevo y reiniciá.
-- Algunas cuentas Enterprise no exponen ningún medidor con límite; en ese caso la cuenta queda `unavailable`.
-- Las políticas de la organización pueden limitar lo que muestra el dashboard.
+- The session expires and does not renew itself. When that happens, the account goes to `auth_required`: copy the cookie again and restart.
+- Some Enterprise accounts expose no meter with a limit; in that case the account stays `unavailable`.
+- Your organization's policies may limit what the dashboard shows.

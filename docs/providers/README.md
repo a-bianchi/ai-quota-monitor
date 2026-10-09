@@ -1,44 +1,44 @@
-# Proveedores
+# Providers
 
-[English](README.en.md) · **Español**
+**English** · [Español](README.es.md)
 
-Para conectar tus cuentas, ver la [guía paso a paso](conectar.md).
+To connect your accounts, see the [step-by-step guide](connect.md).
 
-La implementación específica de cada servicio vive en `server/internal/providers/<proveedor>/`:
+The specific implementation of each service lives in `server/internal/providers/<provider>/`:
 
-- `codex/`: cliente de Codex App Server, autenticación, sesiones y transformación de cupos.
-- `openrouter/`: cliente HTTP y consulta de créditos.
-- `cursor/`: cliente HTTP del resumen de uso del dashboard.
-- `claude/`: login OAuth, renovación de sesión y lectura de límites de la suscripción.
+- `codex/`: Codex App Server client, authentication, sessions and quota transformation.
+- `openrouter/`: HTTP client and credits query.
+- `cursor/`: HTTP client for the dashboard usage summary.
+- `claude/`: OAuth login, session renewal and reading of the subscription limits.
 
-Los comandos y la API HTTP usan estos paquetes; los próximos proveedores deben seguir la misma estructura.
+The commands and the HTTP API use these packages; future providers must follow the same structure.
 
-## OpenRouter — cliente implementado
+## OpenRouter — client implemented
 
-`source: direct`, `provider: openrouter`, `credentialEnv` apunta a una variable del servidor. Consulta `/api/v1/credits` con Bearer y management key. Devuelve total comprado y total usado, en USD. El saldo es la diferencia; no es una asignación mensual. 401/403 producen auth_required. No se probaron credenciales reales durante la creación del proyecto.
+`source: direct`, `provider: openrouter`, `credentialEnv` points to a server variable. It queries `/api/v1/credits` with Bearer and a management key. It returns total purchased and total used, in USD. The balance is the difference; it is not a monthly allowance. 401/403 produce auth_required. No real credentials were tested while the project was created.
 
-[Documentación oficial](https://openrouter.ai/docs/api/api-reference/credits/get-remaining-credits)
+[Official documentation](https://openrouter.ai/docs/api/api-reference/credits/get-remaining-credits)
 
-## Codex / Work — integrado en servidor
+## Codex / Work — integrated in the server
 
-Consultar cupos propios con `account/rateLimits/read` de Codex App Server, usando autenticación correspondiente. Puede haber varios buckets; conservar duración y renovación reales en vez de asumir siempre 5h/semanal. Validar sesiones aisladas para cuentas personales/laborales sin cambiar la sesión principal. La API inicia login por código mediante HTTP y consulta los cupos directamente en el homelab. Ver [setup de Codex](codex.md).
+Query your own quotas with `account/rateLimits/read` from Codex App Server, using the corresponding authentication. There may be several buckets; keep the real duration and reset instead of always assuming 5h/weekly. Validate isolated sessions for personal/work accounts without changing the main session. The API starts the code login over HTTP and queries the quotas directly on the homelab. See [Codex setup](codex.md).
 
-[Documentación oficial](https://learn.chatgpt.com/docs/app-server)
+[Official documentation](https://learn.chatgpt.com/docs/app-server)
 
-Los datos no representan todos los cupos del chat normal de ChatGPT.
+The data does not represent every quota of the regular ChatGPT chat.
 
-## Claude — integrado en servidor, experimental
+## Claude — integrated in the server, experimental
 
-`source: direct`, `provider: anthropic`. Login OAuth por HTTP y lectura de las ventanas de 5h y 7d desde un endpoint no documentado. Es la suscripción, no gasto de API. **Los términos de Anthropic no permiten este uso de las credenciales**; leer la advertencia en [setup de Claude](claude-subscription.md) antes de activarlo. No se validó con una cuenta real.
+`source: direct`, `provider: anthropic`. OAuth login over HTTP and reading of the 5h and 7d windows from an undocumented endpoint. It is the subscription, not API spend. **Anthropic's terms do not permit this use of the credentials**; read the warning in [Claude setup](claude-subscription.md) before enabling it. Not validated with a real account.
 
-## Cursor — cliente implementado, experimental
+## Cursor — client implemented, experimental
 
-`source: direct`, `provider: cursor`, `credentialEnv` apunta a la cookie de sesión de cursor.com. Consulta el endpoint no documentado `/api/usage-summary` con permisos de usuario normal, sin Admin API. Devuelve porcentajes con la renovación del ciclo de facturación. No se validó con una cuenta real. Ver [setup de Cursor](cursor.md).
+`source: direct`, `provider: cursor`, `credentialEnv` points to the cursor.com session cookie. It queries the undocumented `/api/usage-summary` endpoint with regular user permissions, without the Admin API. It returns percentages with the billing-cycle reset. Not validated with a real account. See [Cursor setup](cursor.md).
 
-## Kiro — investigación pendiente
+## Kiro — research pending
 
-El usuario objetivo no tiene acceso admin. No asumir que existe una API pública Kiro de saldo. Validar qué datos permite leer la propia sesión. Si se utiliza una interfaz privada del dashboard, documentar dependencia y fragilidad, mantener permisos normales de usuario y marcar experimental. Nunca inventar cupos a partir de gastos o tokens sin un límite conocido.
+The target user has no admin access. Do not assume that a public Kiro balance API exists. Validate what data the user's own session can read. If a private dashboard interface is used, document the dependency and its fragility, keep regular user permissions and mark it experimental. Never invent quotas from spend or tokens without a known limit.
 
 - [Kiro FAQ](https://kiro.dev/faq/)
 
-Los ejemplos mock son exclusivamente para diseño. No implementan autenticación ni scraping de estos servicios.
+The mock examples are for design only. They implement no authentication or scraping of these services.
