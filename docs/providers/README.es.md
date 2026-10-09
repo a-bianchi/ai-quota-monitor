@@ -11,7 +11,7 @@ La implementación específica de cada servicio vive en `server/internal/provide
 - `cursor/`: cliente HTTP del resumen de uso del dashboard.
 - `claude/`: login OAuth, renovación de sesión y lectura de límites de la suscripción.
 
-Los comandos y la API HTTP usan estos paquetes; los próximos proveedores deben seguir la misma estructura.
+Los comandos y la API HTTP usan estos paquetes; los próximos proveedores deben seguir la misma estructura. Ver [cómo agregar un proveedor](../../CONTRIBUTING.es.md#agregar-un-proveedor).
 
 ## OpenRouter — cliente implementado
 

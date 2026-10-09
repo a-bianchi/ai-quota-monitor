@@ -11,7 +11,7 @@ The specific implementation of each service lives in `server/internal/providers/
 - `cursor/`: HTTP client for the dashboard usage summary.
 - `claude/`: OAuth login, session renewal and reading of the subscription limits.
 
-The commands and the HTTP API use these packages; future providers must follow the same structure.
+The commands and the HTTP API use these packages; future providers must follow the same structure. See [how to add a provider](../../CONTRIBUTING.md#adding-a-provider).
 
 ## OpenRouter — client implemented
 

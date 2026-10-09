@@ -57,7 +57,7 @@ func (a *API) Handler() http.Handler {
 	a.loginLimiter = panelauth.NewLimiter(5, 15*time.Minute)
 	a.globalLimiter = panelauth.NewLimiter(50, 15*time.Minute)
 	m := http.NewServeMux()
-	m.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { write(w, 200, map[string]string{"status": "ok"}) })
+	m.HandleFunc("GET /ping", func(w http.ResponseWriter, r *http.Request) { write(w, 200, map[string]string{"status": "ok"}) })
 	m.Handle("POST /auth/login", a.panelOnly(a.login))
 	m.Handle("POST /auth/refresh", a.panelOnly(a.refresh))
 	m.Handle("POST /auth/logout", a.panelOnly(a.logout))

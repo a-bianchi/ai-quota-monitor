@@ -2,126 +2,134 @@
 
 **English** · [Español](README.es.md)
 
-Desk monitor that shows the remaining balance of your AI services, with separate pages for **Personal** and **Work**, built on a Waveshare ESP32-C6-LCD-1.47.
+[![Go](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml/badge.svg)](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Status: server MVP.** Go API, example mode, persistence and OpenRouter client implemented. Codex integrated in the server with device-code login and isolated profiles. Firmware, other collectors and the enclosure are still pending. No data or credentials from real accounts are published.
+Self-hosted monitor for the quotas of your AI services. A Go API polls each provider, stores the latest value and shows it in a web panel and, later, on a physical ESP32 desk display. It keeps **personal** and **work** accounts apart.
 
-## Getting started with Docker Compose
+![Web panel dashboard with example accounts](docs/assets/panel-dashboard.png)
 
-Requirements: Git and Docker with Compose v2.
+*Panel dashboard with the six fictitious accounts of example mode (`EJEMPLO` tag). Screenshots show the Spanish interface; the panel is also available in English.*
+
+## What problem it solves
+
+Every AI service shows its usage somewhere different: a 5-hour window here, a weekly limit there, a prepaid balance on another page. This project puts those numbers in one place, in the same format, without opening each dashboard.
+
+## Implemented features
+
+- **JSON API** with a single quota contract: unit, used, limit, reset time, account status and usage level (`usageLevel`).
+- **Web panel** embedded in the same binary: dashboard, preview of the ESP32 screen and provider settings. Spanish and English.
+- **Personal and work accounts** kept apart, with a `?scope=personal|work` filter.
+- **Example mode** with fictitious data, to try it without any real account.
+- **Periodic polling** of the providers, flagging stale data and expired sessions.
+- **Credentials on the server**: per-account Codex and Claude sessions, and keys loaded from the panel encrypted with AES-256-GCM.
+- Optional **ingestion** of data sent by an external collector.
+- **Deployment** as a Go binary or with Docker Compose.
+
+## Providers
+
+| Service | Status | How it connects |
+|---|---|---|
+| OpenRouter | Implemented | Management key; official credits API |
+| Codex (ChatGPT) | Implemented | Device-code login through Codex App Server |
+| Cursor | Experimental | Session cookie; undocumented dashboard endpoint |
+| Claude Pro/Max | Experimental; [not permitted by Anthropic's terms](docs/providers/claude-subscription.md) | OAuth login; undocumented usage endpoint |
+| Kiro | Pending | Exists only as an example account |
+| ChatGPT (regular chat) | Not integrated | No complete counter was confirmed through an API |
+
+The clients have tests against simulated servers. Each provider's documentation states what was validated with real accounts and what was not: see [providers](docs/providers/README.md) and the [guide to connect them](docs/providers/connect.md).
+
+## Screenshots
+
+Taken from the real panel with demo data.
+
+| Display preview | Settings |
+|---|---|
+| ![Preview of the ESP32 screen](docs/assets/panel-display.png) | ![Provider settings](docs/assets/panel-settings.png) |
+| What the 172 × 320 px screen would show, with the example accounts. | Example configuration, with no session started and no credential loaded. |
+
+## Quick start
+
+Requirements: Git and Docker with Compose v2. From the repo root:
 
 ```sh
 cp server/.env.example server/.env
 openssl rand -hex 32
 ```
 
-Copy the result into `DEVICE_TOKEN` in `server/.env`. Generate a different token for `COLLECTOR_TOKEN` if you are going to receive metrics from a collector. Then:
+Paste the result into `DEVICE_TOKEN` in `server/.env`. Then:
 
 ```sh
 make docker-up
-curl http://localhost:8080/healthz
+curl http://localhost:8080/ping
 ```
 
-To query data, replace the placeholder with your token:
+To read the data, replace the placeholder with your token:
 
 ```sh
 curl -H 'Authorization: Bearer YOUR_DEVICE_TOKEN' \
   'http://localhost:8080/usage?scope=personal'
 ```
 
-The initial configuration shows **six fictitious accounts**, with `source: mock`. `used` means consumption; the display must compute the remaining balance. The examples do not prove real access to Cursor, Kiro or Claude. Loading the first batch may take a moment.
+It starts in example mode, with six fictitious accounts. Next steps:
 
-## Running without Docker
+- **Without Docker**: `make run`, with Go 1.22 or later. See [local setup](docs/local-setup.md).
+- **Web panel**: create the user with `make panel-password` and open <http://localhost:8080/>. See [web panel](docs/panel.md).
+- **Real accounts**: set `CONFIG_NAME=config.live.json` and follow the [provider guide](docs/providers/connect.md).
 
-Requirement: Go 1.22 or later; on macOS, Xcode Command Line Tools for the system linker. From the repo root:
+## How it works
 
-```sh
-cp server/.env.example server/.env
-# Fill in DEVICE_TOKEN in server/.env with a token generated with openssl rand -hex 32.
-make run
+```mermaid
+flowchart LR
+    P["AI providers<br/>OpenRouter · Codex · Claude · Cursor"]
+    C["Collector<br/>(optional)"]
+    S["Go server<br/>API + web panel<br/>localhost:8080"]
+    D[("server/data<br/>latest values")]
+    W["Web panel<br/>browser"]
+    E["ESP32 display<br/>(firmware pending)"]
+
+    P -- "polled every POLL_INTERVAL" --> S
+    C -- "PUT usage" --> S
+    S <--> D
+    S -- "GET /usage" --> W
+    S -- "GET /usage" --> E
 ```
 
-The server listens on `127.0.0.1:8080`. Data is stored in `server/data/`. The server loads `server/.env` automatically when it runs from `server/` (as `make run` does). Variables exported in the terminal take priority. Docker uses the same file through `make docker-up`.
+A single Go process polls the providers on a timer, stores the latest value of each account and serves the API and the panel on the same port. The panel and the display only read what is stored: opening them never triggers a request to a provider. More detail in [architecture](docs/architecture.md).
 
-```sh
-make test
-make build
-```
+## Hardware
 
-To use real OpenRouter data, set `CONFIG_NAME=config.live.json` and your management key in `server/.env`. Restart with `make run` or `make docker-up`.
+The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. There is no firmware or enclosure yet; the server and the panel work without the board. See [hardware](docs/hardware.md), [firmware](docs/firmware.md) and [enclosure](enclosure/README.md).
 
-## Web panel
+## Project status
 
-The API also serves a web panel at <http://localhost:8080/>: services dashboard, a preview of the ESP32 screen, and settings to sign in to Codex and load provider keys. It is embedded in the server (no Node or build step) and is disabled until you create a user:
+Working today: server, API, web panel, example mode, Docker Compose and the OpenRouter, Codex, Cursor and Claude clients.
 
-```sh
-make panel-password        # asks for a password and prints AUTH_PASSWORD_HASH=...
-openssl rand -base64 32    # value for MASTER_KEY
-```
+Pending:
 
-Put `AUTH_USERNAME`, the `AUTH_PASSWORD_HASH` line and `MASTER_KEY` in `server/.env`, restart and open the URL. Details in [web panel](docs/panel.md).
+- ESP32 firmware and tests on the physical board.
+- Enclosure design and files for 3D printing.
+- Kiro integration.
+- Validation of the experimental integrations with real accounts.
+- A real, tested Coolify deployment.
 
-## Integrations
-
-| Service | Repo status | Source |
-|---|---|---|
-| OpenRouter | Client implemented | Official credits API; requires a management key |
-| Codex / Work | Integrated in the server; HTTP device-code login and automatic polling | App Server `account/rateLimits/read` |
-| Claude Pro/Max | Integrated in the server, experimental; [not permitted by Anthropic's terms](docs/providers/claude-subscription.md) | OAuth login and undocumented usage endpoint |
-| Cursor | Client implemented, experimental; not validated with a real account | Undocumented dashboard endpoint (`/api/usage-summary`) with the session cookie |
-| Kiro | Research pending for non-admin access | Credits panel; automatic path still to be validated |
-| Regular ChatGPT | Not integrated | No complete counter was confirmed through an API |
-
-To connect your accounts, follow the [step-by-step guide](docs/providers/connect.md). See also [providers](docs/providers/README.md). Codex quotas do not represent every ChatGPT feature.
-
-## Querying Codex from the homelab
-
-With `CONFIG_NAME=config.live.json`, the API queries Codex directly. It needs no process on your Mac. Use your existing `COLLECTOR_TOKEN` (32+ characters and different from DEVICE_TOKEN) in `server/.env`, restart the API and send:
-
-```sh
-curl -X POST http://localhost:8080/accounts/codex-work/codex/login \
-  -H 'Authorization: Bearer YOUR_COLLECTOR_TOKEN'
-```
-
-The response returns `verificationUrl` and `userCode`. Open that URL in your browser, enter the code and choose the work account. The session stays on the server. Check the status with a GET on the same URL and the same token. When the login completes, the quotas are updated automatically.
-
-For your personal account use `codex-personal`. See the [server login guide](docs/providers/codex.md).
-
-## Architecture
-
-```text
-OpenRouter + Codex ──> Go server ──> GET /usage ──> ESP32
-                            ↑
-Browser ── authorizes the Codex device-code login
-```
-
-The server queries the direct OpenRouter/Codex sources and keeps the optional ingestion for other accounts configured as `collector`. It stores the latest value and flags stale data or authentication problems. Reads from the ESP32 do not trigger new requests to the provider.
-
-## Postman collection
-
-`docs/collections/` contains a ready-to-use Postman collection and environment:
-
-- `ai-quota-monitor.postman_collection.json`: login, refresh, `GET /usage` and the Codex and Claude login requests.
-- `ai-quota-monitor.postman_environment.json`: the variables the requests use, with empty values.
-
-Import both files in Postman (**Import** → drop the two files), select the `ai-quota-monitor` environment and fill in `url` (for example `http://localhost:8080`), `COLLECTOR_TOKEN` and, if you enabled the panel login, `username` and `password`. The login and refresh requests save `access_token` and `refresh_token` in the environment automatically. Keep your values in Postman; do not commit them.
+The details are in the [roadmap](docs/roadmap.md).
 
 ## Documentation
 
-- [Web panel](docs/panel.md)
-- [Contract and endpoints](docs/api.md)
-- [Postman collection and environment](docs/collections/)
-- [Local setup and variables](docs/local-setup.md)
-- [Docker, homelab, Coolify and cloud](docs/deployment.md)
-- [Hardware and bill of materials](docs/hardware.md)
-- [Firmware and screen design](docs/firmware.md)
-- [Enclosure and 3D printing](enclosure/README.md)
-- [Roadmap](docs/roadmap.md)
+The [documentation index](docs/README.md) lists every topic. The most used:
 
-JSON configuration lives in `server/configs/`; secrets in `server/.env` or environment variables. The server uses only the Go standard library; the panel vendors Alpine.js. Mock mode lets you develop without hardware.
+- [Local setup](docs/local-setup.md) and [configuration](docs/configuration.md)
+- [Deployment with Docker, homelab and Coolify](docs/deployment.md)
+- [Web panel](docs/panel.md)
+- [Providers](docs/providers/connect.md)
+- [API reference](docs/api.md)
+- [Troubleshooting](docs/troubleshooting.md)
 
 ## Contributing
 
-Run `make test` and `cd server && go vet ./...` before proposing changes. Every integration must document authentication, units, refresh behavior and limitations. Do not include cookies, session files, keys or work information in commits or issues.
+Changes are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to run the project, run the tests and add a provider. Do not include cookies, sessions, keys or work data in commits or issues.
 
-MIT license. Not affiliated with the manufacturers or providers mentioned.
+## License
+
+[MIT](LICENSE). Not affiliated with the manufacturers or providers mentioned.

@@ -2,58 +2,103 @@
 
 **English** · [Español](local-setup.es.md)
 
-The repo root contains `compose.yaml`. `server/configs/config.json` uses fictitious data; `server/configs/config.live.json` includes direct OpenRouter and direct personal/work Codex with login on the server.
+How to run the server on your machine without Docker. For Docker Compose, see [deployment](deployment.md).
 
-Each account defines `id`, `name`, `provider`, `scope`, `source` and, for direct OpenRouter, `credentialEnv`. IDs are unique, made of lowercase letters, digits, hyphens and underscores. Strict JSON: unknown fields are rejected.
+## Requirements
 
-| Variable | Default value / use |
+- Git.
+- Go 1.22 or later.
+- `make` and `openssl`.
+- On macOS, Xcode Command Line Tools: `make build` uses the system linker and signs the binary locally (ad-hoc signature, no developer identity).
+- Codex CLI, only if you are going to use Codex accounts. Set it with `CODEX_BIN`.
+
+The server uses only the Go standard library: there are no dependencies to download.
+
+## First run
+
+Every command runs from the repo root.
+
+1. Create the environment file:
+
+   ```sh
+   cp server/.env.example server/.env
+   ```
+
+2. Generate a token and paste it into `DEVICE_TOKEN` in `server/.env`:
+
+   ```sh
+   openssl rand -hex 32
+   ```
+
+3. Build and start:
+
+   ```sh
+   make run
+   ```
+
+4. In another terminal, check that it responds:
+
+   ```sh
+   curl http://localhost:8080/ping
+   curl -H 'Authorization: Bearer YOUR_DEVICE_TOKEN' http://localhost:8080/usage
+   ```
+
+The server listens on `127.0.0.1:8080` and starts in example mode: six fictitious accounts with `source: mock`. `used` is the consumption; the balance is `limit - used`.
+
+Data is stored in `server/data/`, which is in `.gitignore` together with `server/.env`.
+
+## `make` commands
+
+| Command | What it does |
 |---|---|
-| `DEVICE_TOKEN` | Required, at least 32 characters; reading metrics |
-| `COLLECTOR_TOKEN` | Optional; if set, at least 32 characters and different from the previous one |
-| `AUTH_USERNAME`, `AUTH_PASSWORD_HASH` | Optional, set together; they enable the [web panel](panel.md). The hash comes from `make panel-password`; never a plain-text password |
-| `MASTER_KEY` | Optional, 32+ characters; encrypts the provider credentials saved from the panel |
-| `HTTP_HOST` | `127.0.0.1` without Docker; Compose uses `0.0.0.0` inside the container |
-| `HTTP_PORT` | `8080`; in Compose it sets the host port |
-| `HOST_BIND` | Compose only: `127.0.0.1` for local access |
-| `CONFIG_NAME` | Go and Docker: file name inside `server/configs/`, default `config.json` |
-| `MOCK_FILE` | Binary: `configs/mock-usage.json` from `server/` |
-| `DATA_DIR` | Binary: `./data`; Compose: `/data` with a persistent volume |
-| `POLL_INTERVAL` | `5m`; Go duration, minimum 1s |
-| `STALE_AFTER` | `15m`; must be >= the interval |
-| `OPENROUTER_PERSONAL_KEY` | Management key, only for the live configuration. Fallback: a key saved from the panel takes priority |
-| `CURSOR_WORK_SESSION` | cursor.com session cookie, only for the live configuration; see [Cursor](providers/cursor.md) |
+| `make run` | Builds and starts the server from `server/` |
+| `make build` | Builds `server/bin/ai-quota-monitor` |
+| `make test` | Runs the tests with the race detector |
+| `make panel-password` | Asks for a password and prints the `AUTH_PASSWORD_HASH=...` line |
+| `make docker-up` / `make docker-down` | Starts or stops the service with Docker Compose |
+| `make build-collector` | Builds the optional Codex collector |
 
-## Real OpenRouter with Compose
+You can also use `cd server && go run ./cmd/server`. On macOS prefer `make run`, which takes care of the linker and signing.
 
-Edit `server/.env`: `CONFIG_NAME=config.live.json` and `OPENROUTER_PERSONAL_KEY` with your key. Then `make docker-up`. Codex accounts require completing the [server HTTP login](providers/codex.md).
+## Next steps
 
-To use your own configuration without versioning it: save `server/configs/config.local.json` and choose `CONFIG_NAME=config.local.json`. It works the same with Go and Docker, without changing mounts. `CONFIG_NAME` is the file name, not a path. `CONFIG_FILE` is no longer used.
+- **Web panel**: create the user with `make panel-password` and open <http://localhost:8080/>. See [web panel](panel.md).
+- **Real accounts**: set `CONFIG_NAME=config.live.json` in `server/.env` and follow the [provider guide](providers/connect.md).
+- **Variables and accounts file**: see [configuration](configuration.md).
 
-The server loads `.env` from its working directory; `make run` runs from `server/`. You can also use `cd server && go run ./cmd/server` with a Go version compatible with your system. On macOS with Go 1.22 use `make run`, which takes care of the linker and signing.
+## Testing ingestion by hand
 
-`make docker-up` is equivalent to `docker compose --env-file server/.env up --build -d`, from the root. We use `--env-file` because Compose lives at the root and the secrets belong to the server.
+Ingestion only accepts accounts with `source: collector`, and the bundled configurations have none. To test it:
 
-Variables exported in the terminal or defined by Docker take priority over `.env`; if you exported CONFIG_NAME earlier, use `unset CONFIG_NAME` to pick up the value from the file. The dotenv loader supports simple assignments, quotes and full-line comments; it does not run commands or expand variables. Paste real values, not shell expressions.
+1. Save `server/configs/config.local.json` with an account of that kind:
 
-The `.env` files and `server/data/` are ignored by Git. `server/.env.example` only carries empty placeholders. Do not paste tokens in issues. The server does not print keys or provider error bodies.
+   ```json
+   {"accounts": [{"id": "codex-work", "name": "Codex work", "provider": "openai", "scope": "work", "source": "collector"}]}
+   ```
 
-## Manual ingestion test
+2. In `server/.env`, set `CONFIG_NAME=config.local.json` and a `COLLECTOR_TOKEN` generated with `openssl rand -hex 32`. Restart with `make run`.
 
-With `config.live.json` and a collector token defined, use a current UTC timestamp:
+3. Send a report with the current UTC time:
+
+   ```sh
+   printf '{"updatedAt":"%s","quotas":[{"id":"5h","name":"5 horas","unit":"percent","used":11,"limit":100,"resetsAt":null}]}' \
+     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > /tmp/quota-report.json
+   curl -X PUT http://localhost:8080/accounts/codex-work/usage \
+     -H 'Authorization: Bearer YOUR_COLLECTOR_TOKEN' \
+     -H 'Content-Type: application/json' \
+     --data-binary @/tmp/quota-report.json
+   ```
+
+These are fictitious numbers: this test does not query Codex. Do not send reports to `direct` accounts; the server rejects them with 404.
+
+## Optional Codex collector
+
+`server/cmd/collector` reads the Codex quotas on your machine and sends them to the API. It is only needed if you declare an `openai` account with `source: collector`; with `config.live.json` the server queries Codex directly and it is not used.
 
 ```sh
-printf '{"updatedAt":"%s","quotas":[{"id":"5h","name":"5 horas","unit":"percent","used":11,"limit":100,"resetsAt":null}]}' \
-  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > /tmp/quota-report.json
-curl -X PUT http://localhost:8080/accounts/codex-work/usage \
-  -H 'Authorization: Bearer YOUR_COLLECTOR_TOKEN' \
-  -H 'Content-Type: application/json' \
-  --data-binary @/tmp/quota-report.json
+make codex-login ACCOUNT=codex-work     # signs in to an isolated profile
+make collect-codex-once ACCOUNT=codex-work
+make collect-codex ACCOUNT=codex-work   # sends every CODEX_POLL_INTERVAL
 ```
 
-This test sends fictitious numbers; it does not query Codex.
-
-On macOS, `make build` uses the system linker and signs the binary locally (ad-hoc) for compatibility with Go 1.22. `make run` builds and starts that binary. No developer identity is used and no commercial signature is distributed.
-
-Collector variables: `QUOTA_API_URL` (default http://localhost:8080), `CODEX_BIN` (default codex), `CODEX_POLL_INTERVAL` (default 5m, minimum 10s). Do not put ChatGPT credentials in `.env`.
-
-`config.live.json` now uses source=direct for Codex: the ingestion test above requires an account with source=collector in a custom configuration. Do not send manual reports to direct accounts.
+Its variables are in [configuration](configuration.md#optional-collector). Do not put ChatGPT credentials in `.env`.

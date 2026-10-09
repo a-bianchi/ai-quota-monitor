@@ -15,7 +15,20 @@ MicroSD is not required for the MVP.
 
 According to the manufacturer's documentation, LCD: MOSI GPIO6, SCLK GPIO7, CS GPIO14, DC GPIO15, RST GPIO21, backlight GPIO22; RGB GPIO8. Confirm against the physical revision before wiring or flashing. The manufacturer recommends 50% brightness or lower for prolonged use.
 
-Sources:
+## Connections and assembly
+
+The screen, the RGB LED and the microSD slot are built into the board: there is nothing to wire or solder. The only cable is the USB-C one, which powers the board and is used to flash it.
+
+There are no validated assembly instructions yet. They depend on the [firmware](firmware.md) and the [enclosure](../enclosure/README.md), which are pending.
+
+## Status and next steps
+
+- The board is chosen; the firmware has not been tested on a physical board.
+- Next step: check the pins against the real board and light up the screen with an official Waveshare example.
+- Meanwhile, the **Display** view of the [web panel](panel.md) shows the content planned for the screen.
+
+## Sources
+
 
 - [Waveshare documentation](https://docs.waveshare.com/ESP32-C6-LCD-1.47)
 - [Manufacturer product page](https://www.waveshare.com/ESP32-C6-LCD-1.47.htm)

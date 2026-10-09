@@ -15,7 +15,20 @@ MicroSD no requerida para el MVP.
 
 Según la documentación del fabricante, LCD: MOSI GPIO6, SCLK GPIO7, CS GPIO14, DC GPIO15, RST GPIO21, backlight GPIO22; RGB GPIO8. Confirmar contra la revisión física antes de cablear/programar. El fabricante recomienda brillo de 50% o menor para uso prolongado.
 
-Fuentes:
+## Conexiones y montaje
+
+La pantalla, el LED RGB y la ranura microSD vienen integrados en la placa: no hay nada que cablear ni soldar. El único cable es el USB-C, que alimenta la placa y sirve para programarla.
+
+No hay instrucciones de montaje validadas todavía. Dependen del [firmware](firmware.es.md) y de la [carcasa](../enclosure/README.es.md), que están pendientes.
+
+## Estado y próximos pasos
+
+- La placa está elegida; el firmware no se probó en una placa física.
+- Próximo paso: verificar los pines contra la placa real y encender la pantalla con un ejemplo oficial de Waveshare.
+- Mientras tanto, la vista **Display** del [panel web](panel.es.md) muestra el contenido previsto para la pantalla.
+
+## Fuentes
+
 
 - [Documentación Waveshare](https://docs.waveshare.com/ESP32-C6-LCD-1.47)
 - [Producto del fabricante](https://www.waveshare.com/ESP32-C6-LCD-1.47.htm)

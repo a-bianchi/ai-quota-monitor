@@ -2,7 +2,33 @@
 
 **English** · [Español](api.es.md)
 
-A ready-to-import Postman collection and environment for these endpoints live in [`docs/collections/`](collections/).
+A Postman collection and environment for these endpoints live in [`docs/collections/`](collections/). Import both files, select the `ai-quota-monitor` environment and fill in `url` (for example `http://localhost:8080`), `COLLECTOR_TOKEN` and, if you enabled the panel, `username` and `password`. The login and refresh requests save the tokens in the environment. Do not commit your values.
+
+The API answers JSON. The examples use `http://localhost:8080`; replace the `YOUR_...` placeholders with your values.
+
+## Endpoint summary
+
+| Method and route | Authentication | Use |
+|---|---|---|
+| `GET /ping` | None | Check that the process responds |
+| `GET /usage` | `DEVICE_TOKEN`, `COLLECTOR_TOKEN` or panel session | [Read the quotas](#reading) |
+| `PUT /accounts/{id}/usage` | `COLLECTOR_TOKEN` | [Send data from a collector](#ingestion) |
+| `POST`, `GET /accounts/{id}/codex/login` | `COLLECTOR_TOKEN` or panel session | [Codex login](#codex-login-on-the-homelab) |
+| `POST`, `PUT`, `GET /accounts/{id}/claude/login` | `COLLECTOR_TOKEN` or panel session | [Claude login](#claude-login-on-the-homelab) |
+| `POST /auth/login`, `/auth/refresh`, `/auth/logout` | Username and password, or refresh token | [Panel session](#panel-session) |
+| `GET /accounts` | Panel session | [Configurable accounts](#panel-configuration) |
+| `PUT /accounts/{id}/credential` | Panel session | [Save a credential](#panel-configuration) |
+| `GET /` and `/static/` | None | [Web panel](panel.md) files |
+
+Tokens are sent as `Authorization: Bearer <token>`. What each one allows: [API tokens](configuration.md#api-tokens).
+
+Errors always have the same shape, with a non-2xx HTTP code:
+
+```json
+{"error": "unauthorized"}
+```
+
+Codes common to protected routes: 401 if the token is missing or wrong, and 503 (`endpoint disabled`) if the route depends on something that is not configured.
 
 ## Panel session
 
@@ -36,7 +62,7 @@ Panel session only; the static tokens are not accepted.
 
 ## Reading
 
-`GET /usage`, with `Authorization: Bearer DEVICE_TOKEN`. It also accepts `COLLECTOR_TOKEN` and a panel session. Optional filter `?scope=personal` or `?scope=work`. `GET /healthz` is public and only indicates that the HTTP process responds; it does not guarantee that the providers are available.
+`GET /usage`, with `Authorization: Bearer DEVICE_TOKEN`. It also accepts `COLLECTOR_TOKEN` and a panel session. Optional filter `?scope=personal` or `?scope=work`. `GET /ping` is public and only indicates that the HTTP process responds; it does not guarantee that the providers are available.
 
 Optional headers:
 
@@ -47,7 +73,20 @@ Optional headers:
 
 `X-Timezone` converts `generatedAt`, `updatedAt` and `resetsAt` to that zone; the instant is the same, only the offset changes (`-03:00`, `+02:00`, or `Z` for UTC). An unknown zone returns 400. `Accept-Language` translates `quotas[].name`; the first supported language in the list is used and anything else falls back to Spanish. Quota `id` values are never translated. Account names come from the configuration and are not translated, and neither are custom names sent by a collector.
 
-Response (with `Accept-Language: en`):
+Examples:
+
+```sh
+curl http://localhost:8080/ping
+
+curl -H 'Authorization: Bearer YOUR_DEVICE_TOKEN' \
+  'http://localhost:8080/usage?scope=work'
+
+curl -H 'Authorization: Bearer YOUR_DEVICE_TOKEN' \
+  -H 'X-Timezone: UTC' -H 'Accept-Language: en' \
+  http://localhost:8080/usage
+```
+
+`GET /ping` answers `{"status":"ok"}`. Response of `GET /usage` (with `Accept-Language: en`):
 
 ```json
 {
@@ -81,9 +120,24 @@ The values above are fictitious. Dates are RFC3339/ISO 8601, in Argentina time (
 - `source`: `mock`, `direct`, `collector`.
 - `status`: `ok`, `stale`, `auth_required`, `unavailable`.
 - `unit`: `percent`, `credits`, `usd`, `tokens`.
-- `usageLevel`: computed by the server from `used / limit`: `low` (under 50%), `medium` (50% to 80% inclusive), `high` (above 80%), `unknown` (`used` or `limit` missing, or a limit of 0). Response only; an ingestion report that includes it is rejected.
+- `usageLevel`: `low`, `medium`, `high`, `unknown`. See [usage level](#usage-level).
 - `used`, `limit`, `updatedAt`, `resetsAt` may be `null` where applicable.
 - `quotas` is a list, empty while there is no data yet.
+
+### Usage level
+
+`usageLevel` classifies each quota by the percentage used, `used / limit × 100`. The server computes it on every response, for any unit:
+
+| Percentage used | `usageLevel` | Suggested color |
+|---|---|---|
+| Under 50% | `low` | Green |
+| 50% to 80% inclusive | `medium` | Orange |
+| Above 80% | `high` | Red |
+| `used` or `limit` missing, or a limit of 0 | `unknown` | Gray |
+
+The colors are a suggestion for clients; the API only returns the level. The field appears only in responses: an ingestion report that includes it is rejected with 400. For OpenRouter the percentage compares credits spent with credits purchased, so it does not represent a monthly quota.
+
+### Interpreting the values
 
 Balance = `limit - used` when both exist. If consumption exceeds the limit, show it as exhausted and keep the original values. For percentages the limit is 100. Do not add up percentages of different quotas. OpenRouter returns accumulated credits purchased and used: show the USD balance; that total is neither a monthly quota nor a subscription bar.
 
@@ -102,7 +156,7 @@ The MVP has one timestamp/status per account. A collector must send the quotas o
 }
 ```
 
-Only accounts declared with `source: collector` are accepted; identity metadata comes from the configuration, not from the payload. Maximum 64 KiB and 16 quotas, unique IDs and finite non-negative values. It rejects observations older than the latest data and future timestamps beyond a one-minute margin. The list replaces all quotas of the account. Response 200 when persisted, 400 invalid payload, 401 wrong token, 404 account not ingestible, 409 older observation and 503 if ingestion is disabled.
+Only accounts declared with `source: collector` are accepted; identity metadata comes from the configuration, not from the payload. Maximum 64 KiB and 16 quotas, unique IDs and finite non-negative values. It rejects observations older than the latest data and future timestamps beyond a one-minute margin. The list replaces all quotas of the account. Response 200 with `{"status":"ok"}` when persisted, 400 invalid payload, 401 wrong token, 404 account not ingestible, 409 older observation, 500 if it could not be stored and 503 if ingestion is disabled. There is a full `curl` example in [local setup](local-setup.md#testing-ingestion-by-hand).
 
 `COLLECTOR_TOKEN` is shared by the collectors of this MVP: it can update every collector account. It also allows reading `GET /usage`. Do not use it as the device token. Do not send provider credentials in the report.
 

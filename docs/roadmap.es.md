@@ -13,6 +13,10 @@
 - Docker Compose, documentación y CI de Go.
 - Panel web incluido en el servidor: login con sesiones rotativas, tablero, vista previa de la pantalla del ESP32 y configuración de proveedores.
 - Codex en el servidor: login HTTP por device code, perfiles aislados y polling automático.
+- Clientes experimentales de Cursor y de la suscripción de Claude.
+- Credenciales de proveedores cargadas desde el panel y guardadas cifradas.
+- `usageLevel` por cupo en `GET /usage`.
+- Nombres de cupos en español o inglés y fechas en la zona horaria pedida.
 
 ## Próximo
 
@@ -29,6 +33,5 @@
 - Frescura por cupo si hay observaciones independientes.
 - Tokens individuales por recolector y permisos por cuenta.
 - Modelo paramétrico de carcasa (OpenSCAD o CAD equivalente).
-- Dashboard web para previsualizar la pantalla.
 
 El backend todavía no tuvo despliegue real ni pruebas con cuentas reales. No hay instrucciones de montaje físico validadas.

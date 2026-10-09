@@ -2,126 +2,134 @@
 
 [English](README.md) · **Español**
 
-Monitor de escritorio para ver el saldo de servicios de IA, con páginas separadas para **Personal** y **Trabajo**, usando una Waveshare ESP32-C6-LCD-1.47.
+[![Go](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml/badge.svg)](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml)
+[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 
-**Estado: MVP del servidor.** API Go, modo de ejemplo, persistencia y cliente OpenRouter implementados. Codex integrado en el servidor con login por código de dispositivo y perfiles aislados. Firmware, otros recolectores y carcasa todavía pendientes. No se publican datos ni credenciales de cuentas reales.
+Monitor autohospedado de los cupos de tus servicios de IA. Una API en Go consulta a cada proveedor, guarda el último valor y lo muestra en un panel web y, más adelante, en un display físico ESP32 de escritorio. Separa las cuentas **personales** de las **laborales**.
 
-## Empezar con Docker Compose
+![Tablero del panel web con cuentas de ejemplo](docs/assets/panel-dashboard.png)
 
-Requisitos: Git y Docker con Compose v2.
+*Tablero del panel con las seis cuentas ficticias del modo de ejemplo (etiqueta `EJEMPLO`).*
+
+## Qué problema resuelve
+
+Cada servicio de IA muestra su consumo en un lugar distinto: una ventana de 5 horas acá, un límite semanal allá, un saldo prepago en otra página. Este proyecto junta esos números en un solo lugar, con el mismo formato y sin tener que abrir cada dashboard.
+
+## Funcionalidades implementadas
+
+- **API JSON** con un contrato único de cupos: unidad, usado, límite, renovación, estado de la cuenta y nivel de uso (`usageLevel`).
+- **Panel web** incluido en el mismo binario: tablero, vista previa de la pantalla del ESP32 y configuración de proveedores. Español e inglés.
+- **Cuentas personales y laborales** separadas, con filtro `?scope=personal|work`.
+- **Modo de ejemplo** con datos ficticios, para probar sin ninguna cuenta real.
+- **Consulta periódica** a los proveedores y aviso de datos viejos o de sesiones vencidas.
+- **Credenciales en el servidor**: sesiones de Codex y Claude por cuenta, y keys cargadas desde el panel cifradas con AES-256-GCM.
+- **Ingestión** opcional de datos enviados por un recolector externo.
+- **Despliegue** con un binario Go o con Docker Compose.
+
+## Proveedores
+
+| Servicio | Estado | Cómo se conecta |
+|---|---|---|
+| OpenRouter | Implementado | Management key; API oficial de créditos |
+| Codex (ChatGPT) | Implementado | Login por código de dispositivo, mediante Codex App Server |
+| Cursor | Experimental | Cookie de sesión; endpoint no documentado del dashboard |
+| Claude Pro/Max | Experimental; [no permitido por los términos de Anthropic](docs/providers/claude-subscription.es.md) | Login OAuth; endpoint de uso no documentado |
+| Kiro | Pendiente | Solo existe como cuenta de ejemplo |
+| ChatGPT (chat normal) | No integrado | No se confirmó un contador completo por API |
+
+Los clientes tienen tests contra servidores simulados. La documentación de cada proveedor indica qué se validó con cuentas reales y qué no: ver [proveedores](docs/providers/README.es.md) y la [guía para conectarlos](docs/providers/connect.es.md).
+
+## Capturas
+
+Tomadas del panel real con datos de demostración.
+
+| Vista previa del display | Configuración |
+|---|---|
+| ![Vista previa de la pantalla del ESP32](docs/assets/panel-display.png) | ![Configuración de proveedores](docs/assets/panel-settings.png) |
+| Lo que mostraría la pantalla de 172 × 320 px, con las cuentas de ejemplo. | Configuración de ejemplo, sin ninguna sesión iniciada ni credencial cargada. |
+
+## Inicio rápido
+
+Requisitos: Git y Docker con Compose v2. Desde la raíz del repo:
 
 ```sh
 cp server/.env.example server/.env
 openssl rand -hex 32
 ```
 
-Copiá el resultado en `DEVICE_TOKEN` dentro de `server/.env`. Generá otro token distinto para `COLLECTOR_TOKEN` si vas a recibir métricas de un recolector. Luego:
+Pegá el resultado en `DEVICE_TOKEN` dentro de `server/.env`. Después:
 
 ```sh
 make docker-up
-curl http://localhost:8080/healthz
+curl http://localhost:8080/ping
 ```
 
-Para consultar datos, reemplazá el marcador por tu token:
+Para leer los datos, reemplazá el marcador por tu token:
 
 ```sh
 curl -H 'Authorization: Bearer TU_DEVICE_TOKEN' \
   'http://localhost:8080/usage?scope=personal'
 ```
 
-La configuración inicial muestra **seis cuentas ficticias**, con `source: mock`. `used` significa consumo; la pantalla debe calcular el saldo restante. Los ejemplos no prueban acceso real a Cursor, Kiro ni Claude. Puede tomar unos instantes cargar el primer lote.
+Arranca en modo de ejemplo, con seis cuentas ficticias. Los pasos siguientes:
 
-## Ejecutar sin Docker
+- **Sin Docker**: `make run`, con Go 1.22 o posterior. Ver [instalación local](docs/local-setup.es.md).
+- **Panel web**: creá el usuario con `make panel-password` y abrí <http://localhost:8080/>. Ver [panel web](docs/panel.es.md).
+- **Cuentas reales**: poné `CONFIG_NAME=config.live.json` y seguí la [guía de proveedores](docs/providers/connect.es.md).
 
-Requisito: Go 1.22 o posterior; en macOS, Xcode Command Line Tools para el linker del sistema. Desde la raíz del repo:
+## Cómo funciona
 
-```sh
-cp server/.env.example server/.env
-# Completá DEVICE_TOKEN en server/.env con un token generado con openssl rand -hex 32.
-make run
+```mermaid
+flowchart LR
+    P["Proveedores de IA<br/>OpenRouter · Codex · Claude · Cursor"]
+    C["Recolector<br/>(opcional)"]
+    S["Servidor Go<br/>API + panel web<br/>localhost:8080"]
+    D[("server/data<br/>últimos valores")]
+    W["Panel web<br/>navegador"]
+    E["Pantalla ESP32<br/>(firmware pendiente)"]
+
+    P -- "consulta cada POLL_INTERVAL" --> S
+    C -- "PUT de consumo" --> S
+    S <--> D
+    S -- "GET /usage" --> W
+    S -- "GET /usage" --> E
 ```
 
-El servidor escucha en `127.0.0.1:8080`. Los datos se guardan en `server/data/`. El servidor carga automáticamente `server/.env` cuando se ejecuta desde `server/` (como hace `make run`). Variables exportadas en la terminal tienen prioridad. Docker usa el mismo archivo mediante `make docker-up`.
+Un solo proceso Go consulta a los proveedores con un temporizador, guarda el último valor de cada cuenta y sirve la API y el panel en el mismo puerto. El panel y el display solo leen lo guardado: abrirlos nunca dispara una consulta a un proveedor. Más detalle en [arquitectura](docs/architecture.es.md).
 
-```sh
-make test
-make build
-```
+## Hardware
 
-Para usar OpenRouter real, poné `CONFIG_NAME=config.live.json` y tu management key en `server/.env`. Reiniciá con `make run` o `make docker-up`.
+El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. Todavía no hay firmware ni carcasa; el servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md), [firmware](docs/firmware.es.md) y [carcasa](enclosure/README.es.md).
 
-## Panel web
+## Estado del proyecto
 
-La API también sirve un panel web en <http://localhost:8080/>: tablero de servicios, vista previa de la pantalla del ESP32 y configuración para iniciar sesión en Codex y cargar keys de proveedores. Va incluido en el servidor (sin Node ni paso de build) y queda deshabilitado hasta que crees un usuario:
+Funciona hoy: servidor, API, panel web, modo de ejemplo, Docker Compose y los clientes de OpenRouter, Codex, Cursor y Claude.
 
-```sh
-make panel-password        # pide una contraseña e imprime AUTH_PASSWORD_HASH=...
-openssl rand -base64 32    # valor para MASTER_KEY
-```
+Pendiente:
 
-Poné `AUTH_USERNAME`, la línea `AUTH_PASSWORD_HASH` y `MASTER_KEY` en `server/.env`, reiniciá y abrí la URL. Detalle en [panel web](docs/panel.es.md).
+- Firmware del ESP32 y pruebas en la placa física.
+- Diseño de la carcasa y archivos para impresión 3D.
+- Integración con Kiro.
+- Validación con cuentas reales de las integraciones experimentales.
+- Un despliegue real probado en Coolify.
 
-## Integraciones
-
-| Servicio | Estado del repo | Fuente |
-|---|---|---|
-| OpenRouter | Cliente implementado | API oficial de créditos; requiere management key |
-| Codex / Work | Integrado en servidor; login HTTP por código y polling automático | App Server `account/rateLimits/read` |
-| Claude Pro/Max | Integrado en servidor, experimental; [no permitido por los términos de Anthropic](docs/providers/claude-subscription.es.md) | Login OAuth y endpoint de uso no documentado |
-| Cursor | Cliente implementado, experimental; sin validar con cuenta real | Endpoint no documentado del dashboard (`/api/usage-summary`) con cookie de sesión |
-| Kiro | Investigación pendiente con acceso sin admin | Panel de créditos; vía automática por validar |
-| ChatGPT normal | No integrado | No se confirmó un contador completo por API |
-
-Para conectar tus cuentas, seguí la [guía paso a paso](docs/providers/connect.es.md). Ver también [proveedores](docs/providers/README.es.md). Los cupos de Codex no representan todas las funciones de ChatGPT.
-
-## Consultar Codex desde el homelab
-
-Con `CONFIG_NAME=config.live.json`, la API consulta Codex directamente. No necesita un proceso en tu Mac. Usá tu `COLLECTOR_TOKEN` existente (32+ caracteres y distinto de DEVICE_TOKEN) en `server/.env`, reiniciá la API y enviá:
-
-```sh
-curl -X POST http://localhost:8080/accounts/codex-work/codex/login \
-  -H 'Authorization: Bearer TU_COLLECTOR_TOKEN'
-```
-
-La respuesta devuelve `verificationUrl` y `userCode`. Abrí esa URL en tu navegador, ingresá el código y elegí la cuenta laboral. La sesión queda en el servidor. Consultá el estado con GET sobre la misma URL y el mismo token. Al completarse el login se actualizan los cupos automáticamente.
-
-Para tu cuenta personal usá `codex-personal`. Ver [guía de login del servidor](docs/providers/codex.es.md).
-
-## Arquitectura
-
-```text
-OpenRouter + Codex ──> servidor Go ──> GET /usage ──> ESP32
-                            ↑
-Navegador ── autoriza login por código de Codex
-```
-
-El servidor consulta fuentes directas de OpenRouter/Codex y conserva la ingestión opcional para otras cuentas configuradas como `collector`. Guarda el último valor; señala datos viejos o problemas de autenticación. Las lecturas del ESP32 no disparan nuevas consultas al proveedor.
-
-## Colección de Postman
-
-`docs/collections/` contiene una colección y un environment de Postman listos para usar:
-
-- `ai-quota-monitor.postman_collection.json`: login, refresh, `GET /usage` y los logins de Codex y Claude.
-- `ai-quota-monitor.postman_environment.json`: las variables que usan las peticiones, con valores vacíos.
-
-Importá los dos archivos en Postman (**Import** → arrastrá ambos), elegí el environment `ai-quota-monitor` y completá `url` (por ejemplo `http://localhost:8080`), `COLLECTOR_TOKEN` y, si habilitaste el login, `username` y `password`. Las peticiones de login y refresh guardan `access_token` y `refresh_token` en el environment automáticamente. Dejá tus valores en Postman; no los subas al repo.
+El detalle está en el [roadmap](docs/roadmap.es.md).
 
 ## Documentación
 
-- [Panel web](docs/panel.es.md)
-- [Contrato y endpoints](docs/api.es.md)
-- [Colección y environment de Postman](docs/collections/)
-- [Configuración local y variables](docs/local-setup.es.md)
-- [Docker, homelab, Coolify y nube](docs/deployment.es.md)
-- [Hardware y lista de materiales](docs/hardware.es.md)
-- [Firmware y diseño de pantalla](docs/firmware.es.md)
-- [Carcasa e impresión 3D](enclosure/README.es.md)
-- [Roadmap](docs/roadmap.es.md)
+El [índice de documentación](docs/README.es.md) lista todos los temas. Los más usados:
 
-Configuración JSON en `server/configs/`; secretos en `server/.env` o variables de entorno. El servidor usa solo la biblioteca estándar de Go; el panel incluye Alpine.js localmente. El modo mock sirve para desarrollar sin hardware.
+- [Instalación local](docs/local-setup.es.md) y [configuración](docs/configuration.es.md)
+- [Despliegue con Docker, homelab y Coolify](docs/deployment.es.md)
+- [Panel web](docs/panel.es.md)
+- [Proveedores](docs/providers/connect.es.md)
+- [Referencia de la API](docs/api.es.md)
+- [Solución de problemas](docs/troubleshooting.es.md)
 
 ## Contribuir
 
-Ejecutá `make test` y `cd server && go vet ./...` antes de proponer cambios. Cada integración debe documentar autenticación, unidades, actualización y limitaciones. No incluir cookies, archivos de sesión, claves o información del trabajo en commits ni issues.
+Los cambios son bienvenidos. [CONTRIBUTING.es.md](CONTRIBUTING.es.md) explica cómo ejecutar el proyecto, correr las pruebas y agregar un proveedor. No incluyas cookies, sesiones, keys ni datos de trabajo en commits o issues.
 
-Licencia MIT. No afiliado a los fabricantes ni proveedores mencionados.
+## Licencia
+
+[MIT](LICENSE). Proyecto no afiliado a los fabricantes ni a los proveedores mencionados.

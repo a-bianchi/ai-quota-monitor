@@ -12,6 +12,31 @@ Un panel web chico servido por la misma API Go en `/`. Es HTML, CSS y Alpine.js 
 
 Español e inglés, con selector; la elección se guarda en el navegador. El idioma inicial es español.
 
+## Capturas
+
+Tomadas del panel real con datos de demostración; no muestran cuentas ni credenciales reales.
+
+![Tablero de servicios](assets/panel-dashboard.png)
+
+*Servicios, con las seis cuentas ficticias del modo de ejemplo. La etiqueta `EJEMPLO` marca las cuentas `source: mock`.*
+
+![Vista previa del display](assets/panel-display.png)
+
+*Display: vista previa de la pantalla de 172 × 320 px, a escala 2×, con las mismas cuentas de ejemplo.*
+
+![Configuración](assets/panel-settings.png)
+
+*Configuración, con las cuentas de `config.live.json` sin ninguna sesión iniciada ni credencial cargada.*
+
+Para regenerarlas, desde la raíz del repo:
+
+1. Creá un usuario de prueba con `make panel-password` y definí `MASTER_KEY`.
+2. Para Servicios y Display, arrancá con `CONFIG_NAME=config.json` (modo de ejemplo) y `make run`.
+3. Para Configuración, arrancá con `CONFIG_NAME=config.live.json`, una carpeta `DATA_DIR` vacía, las variables de credenciales vacías y `CODEX_BIN` apuntando a una ruta inexistente, así no se usa ninguna cuenta real.
+4. Capturá cada vista con el navegador a 1280 px de ancho y guardá los PNG en `docs/assets/` con los mismos nombres.
+
+Revisá que ninguna captura muestre tokens, keys, emails ni cuentas reales.
+
 ## Crear el usuario
 
 No hay credenciales por defecto. El panel queda deshabilitado hasta que definas un usuario.

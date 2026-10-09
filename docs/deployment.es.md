@@ -4,9 +4,27 @@
 
 ## Docker Compose / homelab
 
-Seguí el README. El volumen `usage-data` conserva las observaciones entre reinicios; `docker compose --env-file server/.env down -v` lo elimina. Los datos se guardan por combinación fuente/cuenta: cambiar de mock a real no reutiliza datos ficticios.
+Requisitos: Git y Docker con Compose v2. Desde la raíz del repo:
+
+```sh
+cp server/.env.example server/.env
+# Completá DEVICE_TOKEN con la salida de: openssl rand -hex 32
+make docker-up
+curl http://localhost:8080/ping
+```
+
+`make docker-up` equivale a `docker compose --env-file server/.env up --build -d`. Se usa `--env-file` porque `compose.yaml` está en la raíz y los secretos pertenecen al servidor. Para detenerlo, `make docker-down`; para ver los logs, `docker compose --env-file server/.env logs -f api`.
+
+Las variables están descritas en [configuración](configuration.es.md). El volumen `usage-data` conserva las observaciones entre reinicios; `docker compose --env-file server/.env down -v` lo elimina. Los datos se guardan por combinación fuente/cuenta: cambiar de mock a real no reutiliza datos ficticios.
 
 Para que el ESP32 acceda desde tu LAN, configurá `HOST_BIND` con la IP LAN del servidor o `0.0.0.0` y recreá el servicio. Usá firewall para limitar acceso a tu red. El valor por defecto solo permite conexiones locales.
+
+```dotenv
+# server/.env — ejemplo; usá la IP LAN de tu servidor
+HOST_BIND=192.168.1.50
+```
+
+Después de cambiarlo, ejecutá `make docker-up` otra vez y probá desde otro equipo con `curl http://192.168.1.50:8080/ping`.
 
 Con Go local y con Docker se utiliza `CONFIG_NAME` y los archivos de `server/configs/`. El Dockerfile incluye las configuraciones, y Compose monta ese directorio para permitir cambios sin reconstruir la imagen. `.env` queda excluido de la imagen; los secretos se inyectan por entorno.
 

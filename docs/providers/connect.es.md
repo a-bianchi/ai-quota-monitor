@@ -6,9 +6,9 @@ Guía paso a paso. Cada proveedor se conecta una sola vez; después el servidor 
 
 | Proveedor | Cómo se conecta | Dónde queda la credencial | Estado |
 |---|---|---|---|
-| [OpenRouter](#openrouter) | Pegar una management key | `server/.env` | Implementado |
+| [OpenRouter](#openrouter) | Pegar una management key | `server/.env` o el panel | Implementado |
 | [Codex (ChatGPT)](#codex-chatgpt) | Login por código desde el navegador | `DATA_DIR/codex/<cuenta>/` | Implementado; login real depende de cada cuenta |
-| [Cursor](#cursor) | Pegar la cookie de sesión | `server/.env` | Experimental |
+| [Cursor](#cursor) | Pegar la cookie de sesión | `server/.env` o el panel | Experimental |
 | [Claude](#claude-suscripción) | Login desde el navegador y pegar un código | `DATA_DIR/claude/<cuenta>/` | Experimental; no permitido por los términos de Anthropic |
 | Kiro | — | — | Pendiente |
 
@@ -18,6 +18,8 @@ Guía paso a paso. Cada proveedor se conecta una sola vez; después el servidor 
 2. Generá dos tokens distintos con `openssl rand -hex 32` y pegalos en `DEVICE_TOKEN` y `COLLECTOR_TOKEN`. Son de esta API, no de los proveedores.
 3. Poné `CONFIG_NAME=config.live.json` para usar cuentas reales en lugar de las de ejemplo.
 4. Arrancá con `make run` (local) o `make docker-up` (Docker).
+
+Los pasos de abajo usan `curl` y `server/.env`. Si habilitaste el [panel web](../panel.es.md), su vista **Configuración** hace lo mismo desde el navegador: inicia los logins de Codex y Claude y guarda las keys de OpenRouter y Cursor cifradas en el servidor (requiere `MASTER_KEY`).
 
 Cada cuenta se declara en `server/configs/config.live.json`. Si no usás un proveedor, borrá su entrada. Después de cambiar `.env` o la configuración hay que reiniciar el servidor.
 

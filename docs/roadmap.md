@@ -13,6 +13,10 @@
 - Docker Compose, documentation and Go CI.
 - Web panel embedded in the server: login with rotating sessions, dashboard, ESP32 screen preview and provider configuration.
 - Codex on the server: HTTP device-code login, isolated profiles and automatic polling.
+- Experimental clients for Cursor and the Claude subscription.
+- Provider credentials loaded from the panel and stored encrypted.
+- Per-quota `usageLevel` in `GET /usage`.
+- Quota names in Spanish or English and dates in the requested time zone.
 
 ## Next
 
@@ -29,6 +33,5 @@
 - Per-quota freshness if there are independent observations.
 - Individual tokens per collector and per-account permissions.
 - Parametric enclosure model (OpenSCAD or equivalent CAD).
-- Web dashboard to preview the screen.
 
 The backend has not had a real deployment or tests with real accounts yet. There are no validated physical assembly instructions.

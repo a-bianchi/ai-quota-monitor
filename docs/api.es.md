@@ -2,7 +2,33 @@
 
 [English](api.md) · **Español**
 
-En [`docs/collections/`](collections/) hay una colección y un environment de Postman listos para importar con estos endpoints.
+En [`docs/collections/`](collections/) hay una colección y un environment de Postman con estos endpoints. Importá los dos archivos, elegí el environment `ai-quota-monitor` y completá `url` (por ejemplo `http://localhost:8080`), `COLLECTOR_TOKEN` y, si habilitaste el panel, `username` y `password`. Los requests de login y refresh guardan los tokens en el environment. No subas tus valores al repo.
+
+La API responde JSON. Los ejemplos usan `http://localhost:8080`; reemplazá los marcadores `TU_...` por tus valores.
+
+## Resumen de endpoints
+
+| Método y ruta | Autenticación | Uso |
+|---|---|---|
+| `GET /ping` | Ninguna | Comprobar que el proceso responde |
+| `GET /usage` | `DEVICE_TOKEN`, `COLLECTOR_TOKEN` o sesión del panel | [Leer los cupos](#lectura) |
+| `PUT /accounts/{id}/usage` | `COLLECTOR_TOKEN` | [Enviar datos de un recolector](#ingestión) |
+| `POST`, `GET /accounts/{id}/codex/login` | `COLLECTOR_TOKEN` o sesión del panel | [Login de Codex](#login-codex-en-homelab) |
+| `POST`, `PUT`, `GET /accounts/{id}/claude/login` | `COLLECTOR_TOKEN` o sesión del panel | [Login de Claude](#login-claude-en-homelab) |
+| `POST /auth/login`, `/auth/refresh`, `/auth/logout` | Usuario y contraseña, o refresh token | [Sesión del panel](#sesión-del-panel) |
+| `GET /accounts` | Sesión del panel | [Cuentas configurables](#configuración-desde-el-panel) |
+| `PUT /accounts/{id}/credential` | Sesión del panel | [Guardar una credencial](#configuración-desde-el-panel) |
+| `GET /` y `/static/` | Ninguna | Archivos del [panel web](panel.es.md) |
+
+Los tokens se envían como `Authorization: Bearer <token>`. Qué permite cada uno: [tokens de la API](configuration.es.md#tokens-de-la-api).
+
+Los errores tienen siempre la misma forma, con un código HTTP distinto de 2xx:
+
+```json
+{"error": "unauthorized"}
+```
+
+Códigos comunes a las rutas protegidas: 401 si el token falta o es incorrecto, y 503 (`endpoint disabled`) si la ruta depende de algo que no está configurado.
 
 ## Sesión del panel
 
@@ -36,7 +62,7 @@ Solo con sesión del panel; los tokens fijos no se aceptan.
 
 ## Lectura
 
-`GET /usage`, con `Authorization: Bearer DEVICE_TOKEN`. También acepta `COLLECTOR_TOKEN` y una sesión del panel. Filtro opcional `?scope=personal` o `?scope=work`. `GET /healthz` es público y solo indica que el proceso HTTP responde; no garantiza que los proveedores estén disponibles.
+`GET /usage`, con `Authorization: Bearer DEVICE_TOKEN`. También acepta `COLLECTOR_TOKEN` y una sesión del panel. Filtro opcional `?scope=personal` o `?scope=work`. `GET /ping` es público y solo indica que el proceso HTTP responde; no garantiza que los proveedores estén disponibles.
 
 Encabezados opcionales:
 
@@ -47,7 +73,20 @@ Encabezados opcionales:
 
 `X-Timezone` convierte `generatedAt`, `updatedAt` y `resetsAt` a esa zona; el instante es el mismo, cambia el desplazamiento (`-03:00`, `+02:00`, o `Z` para UTC). Una zona desconocida devuelve 400. `Accept-Language` traduce `quotas[].name`; se usa el primer idioma soportado de la lista y cualquier otro cae en español. Los `id` de los cupos nunca se traducen. Los nombres de cuenta vienen de la configuración y no se traducen, igual que los nombres propios que envíe un recolector.
 
-Respuesta:
+Ejemplos:
+
+```sh
+curl http://localhost:8080/ping
+
+curl -H 'Authorization: Bearer TU_DEVICE_TOKEN' \
+  'http://localhost:8080/usage?scope=work'
+
+curl -H 'Authorization: Bearer TU_DEVICE_TOKEN' \
+  -H 'X-Timezone: UTC' -H 'Accept-Language: en' \
+  http://localhost:8080/usage
+```
+
+`GET /ping` responde `{"status":"ok"}`. Respuesta de `GET /usage`:
 
 ```json
 {
@@ -81,9 +120,24 @@ Los valores anteriores son ficticios. Fechas RFC3339/ISO 8601, en hora de Argent
 - `source`: `mock`, `direct`, `collector`.
 - `status`: `ok`, `stale`, `auth_required`, `unavailable`.
 - `unit`: `percent`, `credits`, `usd`, `tokens`.
-- `usageLevel`: lo calcula el servidor con `used / limit`: `low` (menos de 50%), `medium` (de 50% a 80% inclusive), `high` (más de 80%), `unknown` (falta `used` o `limit`, o el límite es 0). Solo aparece en las respuestas; un reporte de ingestión que lo incluya se rechaza.
+- `usageLevel`: `low`, `medium`, `high`, `unknown`. Ver [nivel de uso](#nivel-de-uso).
 - `used`, `limit`, `updatedAt`, `resetsAt` pueden ser `null` cuando corresponda.
 - `quotas` es una lista, vacía cuando todavía no hay datos.
+
+### Nivel de uso
+
+`usageLevel` clasifica cada cupo según el porcentaje usado, `used / limit × 100`. Lo calcula el servidor en cada respuesta, para cualquier unidad:
+
+| Porcentaje usado | `usageLevel` | Color sugerido |
+|---|---|---|
+| Menos de 50% | `low` | Verde |
+| De 50% a 80% inclusive | `medium` | Naranja |
+| Más de 80% | `high` | Rojo |
+| Falta `used` o `limit`, o el límite es 0 | `unknown` | Gris |
+
+Los colores son una sugerencia para los clientes; la API solo devuelve el nivel. El campo aparece solo en las respuestas: un reporte de ingestión que lo incluya se rechaza con 400. En OpenRouter el porcentaje compara créditos gastados con créditos comprados, así que no representa una cuota mensual.
+
+### Cómo interpretar los valores
 
 Saldo = `limit - used` si ambos existen. Si el consumo supera el límite, mostrar agotado y conservar los valores originales. En porcentajes el límite es 100. No sumar porcentajes de cupos distintos. OpenRouter devuelve créditos acumulados comprados y usados: mostrar saldo USD; ese total no es un cupo mensual ni una barra de suscripción.
 
@@ -102,7 +156,7 @@ El MVP tiene un timestamp/estado por cuenta. Un recolector debe enviar juntos lo
 }
 ```
 
-Solo admite cuentas declaradas con `source: collector`; metadatos de identidad provienen de la configuración, no del payload. Máximo 64 KiB y 16 cupos, IDs únicos y valores finitos no negativos. Rechaza observaciones anteriores al último dato y timestamps futuros con más de un minuto de margen. La lista reemplaza todos los cupos de la cuenta. Respuesta 200 al persistir, 400 payload inválido, 401 token incorrecto, 404 cuenta no ingerible, 409 observación anterior y 503 si la ingestión está deshabilitada.
+Solo admite cuentas declaradas con `source: collector`; metadatos de identidad provienen de la configuración, no del payload. Máximo 64 KiB y 16 cupos, IDs únicos y valores finitos no negativos. Rechaza observaciones anteriores al último dato y timestamps futuros con más de un minuto de margen. La lista reemplaza todos los cupos de la cuenta. Respuesta 200 con `{"status":"ok"}` al persistir, 400 payload inválido, 401 token incorrecto, 404 cuenta no ingerible, 409 observación anterior, 500 si no se pudo guardar y 503 si la ingestión está deshabilitada. Hay un ejemplo completo con `curl` en [instalación local](local-setup.es.md#probar-la-ingestión-a-mano).
 
 `COLLECTOR_TOKEN` es compartido por los recolectores de este MVP: puede actualizar todas las cuentas collector. También permite leer `GET /usage`. No usarlo como token del dispositivo. No envíes credenciales de proveedor en el reporte.
 
