@@ -1,0 +1,86 @@
+{
+  "codex-personal": [
+    {
+      "id": "5h",
+      "name": "5 horas",
+      "unit": "percent",
+      "used": 28,
+      "limit": 100,
+      "resetsAt": null
+    },
+    {
+      "id": "7d",
+      "name": "Semanal",
+      "unit": "percent",
+      "used": 14,
+      "limit": 100,
+      "resetsAt": null
+    }
+  ],
+  "openrouter-personal": [
+    {
+      "id": "balance",
+      "name": "Saldo prepago",
+      "unit": "usd",
+      "used": 6.6,
+      "limit": 25,
+      "resetsAt": null
+    }
+  ],
+  "claude-personal": [
+    {
+      "id": "5h",
+      "name": "5 horas",
+      "unit": "percent",
+      "used": 36,
+      "limit": 100,
+      "resetsAt": null
+    },
+    {
+      "id": "7d",
+      "name": "Semanal",
+      "unit": "percent",
+      "used": 19,
+      "limit": 100,
+      "resetsAt": null
+    }
+  ],
+  "codex-work": [
+    {
+      "id": "5h",
+      "name": "5 horas",
+      "unit": "percent",
+      "used": 11,
+      "limit": 100,
+      "resetsAt": null
+    },
+    {
+      "id": "7d",
+      "name": "Semanal",
+      "unit": "percent",
+      "used": 6,
+      "limit": 100,
+      "resetsAt": null
+    }
+  ],
+  "cursor-work": [
+    {
+      "id": "monthly",
+      "name": "Mensual",
+      "unit": "percent",
+      "used": 54,
+      "limit": 100,
+      "resetsAt": null
+    }
+  ],
+  "kiro-work": [
+    {
+      "id": "monthly",
+      "name": "Cr\u00e9ditos",
+      "unit": "credits",
+      "used": 680,
+      "limit": 1000,
+      "resetsAt": null
+    }
+  ]
+}

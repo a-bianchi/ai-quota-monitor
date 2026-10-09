@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+config.local.json
+server/data/
+server/bin/
+*.test
+.DS_Store
+.pio/
+
+server/configs/config.local.json

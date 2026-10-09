@@ -1,0 +1,41 @@
+{
+  "accounts": [
+    {
+      "id": "openrouter-personal",
+      "name": "OpenRouter",
+      "provider": "openrouter",
+      "scope": "personal",
+      "source": "direct",
+      "credentialEnv": "OPENROUTER_PERSONAL_KEY"
+    },
+    {
+      "id": "cursor-work",
+      "name": "Cursor trabajo",
+      "provider": "cursor",
+      "scope": "work",
+      "source": "direct",
+      "credentialEnv": "CURSOR_WORK_SESSION"
+    },
+    {
+      "id": "codex-work",
+      "name": "Codex trabajo",
+      "provider": "openai",
+      "scope": "work",
+      "source": "direct"
+    },
+    {
+      "id": "codex-personal",
+      "name": "Codex personal",
+      "provider": "openai",
+      "scope": "personal",
+      "source": "direct"
+    },
+    {
+      "id": "claude-personal",
+      "name": "Claude personal",
+      "provider": "anthropic",
+      "scope": "personal",
+      "source": "direct"
+    }
+  ]
+}

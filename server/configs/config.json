@@ -1,0 +1,46 @@
+{
+  "accounts": [
+    {
+      "id": "codex-personal",
+      "name": "Codex",
+      "provider": "openai",
+      "scope": "personal",
+      "source": "mock"
+    },
+    {
+      "id": "openrouter-personal",
+      "name": "OpenRouter",
+      "provider": "openrouter",
+      "scope": "personal",
+      "source": "mock"
+    },
+    {
+      "id": "claude-personal",
+      "name": "Claude",
+      "provider": "anthropic",
+      "scope": "personal",
+      "source": "mock"
+    },
+    {
+      "id": "codex-work",
+      "name": "Codex",
+      "provider": "openai",
+      "scope": "work",
+      "source": "mock"
+    },
+    {
+      "id": "cursor-work",
+      "name": "Cursor",
+      "provider": "cursor",
+      "scope": "work",
+      "source": "mock"
+    },
+    {
+      "id": "kiro-work",
+      "name": "Kiro",
+      "provider": "kiro",
+      "scope": "work",
+      "source": "mock"
+    }
+  ]
+}
