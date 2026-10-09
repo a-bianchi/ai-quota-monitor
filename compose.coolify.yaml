@@ -1,11 +1,12 @@
-# Coolify: the platform proxy routes to the container, so no host port is
-# published, and the configurations come from the image instead of a bind mount.
+# Coolify: the configurations come from the image instead of a bind mount. The
+# host port defaults to 8090 because Coolify's proxy already uses 8080; it gives
+# access by IP on the LAN without assigning a domain.
 services:
   api:
     build: ./server
     restart: unless-stopped
-    expose:
-      - "8080"
+    ports:
+      - "${HOST_PORT:-8090}:8080"
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 8080
