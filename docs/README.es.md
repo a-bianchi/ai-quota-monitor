@@ -36,8 +36,8 @@
 
 | Tema | Documento | Estado |
 |---|---|---|
-| Placa, materiales y pines | [Hardware](hardware.es.md) | Placa elegida; sin probar con firmware |
-| Firmware y diseño de pantalla | [Firmware](firmware.es.md) | Pendiente |
+| Placa, materiales y pines | [Hardware](hardware.es.md) | Demo oficial probado en la placa |
+| Firmware: instalación paso a paso, carga y problemas frecuentes | [Firmware](firmware.es.md) | Compila; sin probar en la placa |
 | Carcasa e impresión 3D | [Carcasa](../enclosure/README.es.md) | Pendiente |
 
 ## Proyecto

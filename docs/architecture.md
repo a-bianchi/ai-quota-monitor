@@ -16,7 +16,7 @@ flowchart LR
     end
     D[("DATA_DIR")]
     W["Web panel"]
-    E["ESP32 display<br/>(pending)"]
+    E["ESP32 display"]
 
     P --> L
     C -- "PUT /accounts/{id}/usage" --> H
@@ -67,7 +67,7 @@ The JSON files are written atomically. The design assumes a single instance: do 
 ├── Makefile                  Build, test and run commands
 ├── docs/                     Documentation, screenshots and Postman collection
 ├── enclosure/                Enclosure (design pending)
-├── firmware/                 ESP32 firmware (pending)
+├── firmware/                 ESP32 firmware
 └── server/
     ├── Dockerfile
     ├── .env.example

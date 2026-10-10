@@ -5,7 +5,7 @@
 [![Go](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml/badge.svg)](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Self-hosted monitor for the quotas of your AI services. A Go API polls each provider, stores the latest value and shows it in a web panel and, later, on a physical ESP32 desk display. It keeps **personal** and **work** accounts apart.
+Self-hosted monitor for the quotas of your AI services. A Go API polls each provider, stores the latest value and shows it in a web panel and on a physical ESP32 desk display. It keeps **personal** and **work** accounts apart.
 
 ![Web panel dashboard with example accounts](docs/assets/panel-dashboard.png)
 
@@ -86,7 +86,7 @@ flowchart LR
     S["Go server<br/>API + web panel<br/>localhost:8080"]
     D[("server/data<br/>latest values")]
     W["Web panel<br/>browser"]
-    E["ESP32 display<br/>(firmware pending)"]
+    E["ESP32 display"]
 
     P -- "polled every POLL_INTERVAL" --> S
     C -- "PUT usage" --> S
@@ -99,7 +99,7 @@ A single Go process polls the providers on a timer, stores the latest value of e
 
 ## Hardware
 
-The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. There is no firmware or enclosure yet; the server and the panel work without the board. See [hardware](docs/hardware.md), [firmware](docs/firmware.md) and [enclosure](enclosure/README.md).
+The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. The firmware is in [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/) and compiles with Arduino IDE; it has not been tested on the physical board yet. There is no enclosure yet. The server and the panel work without the board. See [hardware](docs/hardware.md) for the exact board and where to buy it, the [firmware guide](docs/firmware.md) to build and flash it, and [enclosure](enclosure/README.md).
 
 ## Project status
 
@@ -107,7 +107,7 @@ Working today: server, API, web panel, example mode, Docker Compose and the Open
 
 Pending:
 
-- ESP32 firmware and tests on the physical board.
+- Tests of the ESP32 firmware on the physical board.
 - Enclosure design and files for 3D printing.
 - Kiro integration.
 - Validation of the experimental integrations with real accounts.

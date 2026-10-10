@@ -9,3 +9,6 @@ server/bin/
 .pio/
 
 server/configs/config.local.json
+
+# Firmware: local Wi-Fi, API URL and device token
+firmware/**/config.h

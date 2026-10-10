@@ -5,7 +5,7 @@
 [![Go](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml/badge.svg)](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 
-Monitor autohospedado de los cupos de tus servicios de IA. Una API en Go consulta a cada proveedor, guarda el último valor y lo muestra en un panel web y, más adelante, en un display físico ESP32 de escritorio. Separa las cuentas **personales** de las **laborales**.
+Monitor autohospedado de los cupos de tus servicios de IA. Una API en Go consulta a cada proveedor, guarda el último valor y lo muestra en un panel web y en un display físico ESP32 de escritorio. Separa las cuentas **personales** de las **laborales**.
 
 ![Tablero del panel web con cuentas de ejemplo](docs/assets/panel-dashboard.png)
 
@@ -86,7 +86,7 @@ flowchart LR
     S["Servidor Go<br/>API + panel web<br/>localhost:8080"]
     D[("server/data<br/>últimos valores")]
     W["Panel web<br/>navegador"]
-    E["Pantalla ESP32<br/>(firmware pendiente)"]
+    E["Pantalla ESP32"]
 
     P -- "consulta cada POLL_INTERVAL" --> S
     C -- "PUT de consumo" --> S
@@ -99,7 +99,7 @@ Un solo proceso Go consulta a los proveedores con un temporizador, guarda el úl
 
 ## Hardware
 
-El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. Todavía no hay firmware ni carcasa; el servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md), [firmware](docs/firmware.es.md) y [carcasa](enclosure/README.es.md).
+El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. El firmware está en [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/README.es.md) y compila con Arduino IDE; todavía no se probó en la placa física. Todavía no hay carcasa. El servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md) para la placa exacta y dónde comprarla, la [guía del firmware](docs/firmware.es.md) para compilarlo y cargarlo, y [carcasa](enclosure/README.es.md).
 
 ## Estado del proyecto
 
@@ -107,7 +107,7 @@ Funciona hoy: servidor, API, panel web, modo de ejemplo, Docker Compose y los cl
 
 Pendiente:
 
-- Firmware del ESP32 y pruebas en la placa física.
+- Pruebas del firmware del ESP32 en la placa física.
 - Diseño de la carcasa y archivos para impresión 3D.
 - Integración con Kiro.
 - Validación con cuentas reales de las integraciones experimentales.

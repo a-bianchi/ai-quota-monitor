@@ -15,23 +15,36 @@ MicroSD no requerida para el MVP.
 
 Según la documentación del fabricante, LCD: MOSI GPIO6, SCLK GPIO7, CS GPIO14, DC GPIO15, RST GPIO21, backlight GPIO22; RGB GPIO8. Confirmar contra la revisión física antes de cablear/programar. El fabricante recomienda brillo de 50% o menor para uso prolongado.
 
+## Placa usada y dónde comprarla
+
+Este proyecto se desarrolló sobre una placa concreta y está basado en ella: la **Waveshare ESP32-C6-LCD-1.47**, comprada como un kit publicado como "ESP32-C6 con LCD 1.47", 172×320, LED RGB, Wi-Fi 6, tarjeta SD". Los pines, el driver de pantalla, las bibliotecas y la [guía del firmware](firmware.es.md) son para este modelo.
+
+Dónde se puede comprar:
+
+| Tienda | Enlace |
+|---|---|
+| Mercado Libre Argentina (donde se compró esta unidad) | <https://www.mercadolibre.com.ar/kit-esp32-c6-con-lcd-147--172320-led-rgb-wifi-6-tarjeta-sd/up/MLAU3223607467> |
+| Amazon | <https://www.amazon.com/dp/B0DNZBXF8G> |
+| AliExpress | <https://www.aliexpress.us/item/3256808808244278.html> |
+
+Las publicaciones y los vendedores cambian, y estos enlaces pueden dejar de funcionar. Antes de comprar, verificá que la publicación sea de la **ESP32-C6-LCD-1.47**: pantalla de 1,47", 172 × 320, ESP32-C6 y **sin touch**. Las placas parecidas (ESP32-S3-LCD-1.47, las versiones Touch, otros tamaños de pantalla) usan otros pines o controladores, y este firmware no funciona en ellas tal como está.
+
 ## Conexiones y montaje
 
 La pantalla, el LED RGB y la ranura microSD vienen integrados en la placa: no hay nada que cablear ni soldar. El único cable es el USB-C, que alimenta la placa y sirve para programarla.
 
-No hay instrucciones de montaje validadas todavía. Dependen del [firmware](firmware.es.md) y de la [carcasa](../enclosure/README.es.md), que están pendientes.
+Para programar la placa, seguí la [guía del firmware](firmware.es.md). No hay instrucciones de montaje validadas todavía: dependen de la [carcasa](../enclosure/README.es.md), que está pendiente.
 
 ## Estado y próximos pasos
 
-- La placa está elegida; el firmware no se probó en una placa física.
-- Próximo paso: verificar los pines contra la placa real y encender la pantalla con un ejemplo oficial de Waveshare.
-- Mientras tanto, la vista **Display** del [panel web](panel.es.md) muestra el contenido previsto para la pantalla.
+- El demo oficial de Waveshare se compiló, se cargó y se vio en la placa real, con los pines listados arriba.
+- El [firmware](firmware.es.md) del proyecto compila; todavía no se probó en una placa física.
+- Próximo paso: cargar el firmware y revisar pantalla, Wi-Fi y legibilidad.
+- La vista **Display** del [panel web](panel.es.md) muestra el mismo contenido en un navegador.
 
 ## Fuentes
 
 
 - [Documentación Waveshare](https://docs.waveshare.com/ESP32-C6-LCD-1.47)
 - [Producto del fabricante](https://www.waveshare.com/ESP32-C6-LCD-1.47.htm)
-- [Referencia de compra en Argentina](https://www.mercadolibre.com.ar/kit-esp32-c6-con-lcd-147--172320-led-rgb-wifi-6-tarjeta-sd/up/MLAU3223607467)
-
-La referencia de compra puede cambiar; verificá el modelo en lugar de depender del vendedor. Todavía no se probó el firmware en una placa física.
+- Tiendas: ver [placa usada y dónde comprarla](#placa-usada-y-dónde-comprarla).

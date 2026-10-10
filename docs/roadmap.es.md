@@ -17,19 +17,19 @@
 - Credenciales de proveedores cargadas desde el panel y guardadas cifradas.
 - `usageLevel` por cupo en `GET /usage`.
 - Nombres de cupos en español o inglés y fechas en la zona horaria pedida.
+- Firmware para ESP32-C6 con Arduino IDE y LVGL 8.3: compila y tiene guía paso a paso; sin probar en la placa.
 
 ## Próximo
 
 1. Validar OpenRouter con una management key propia.
 2. Validar login y cupos reales de ambas cuentas con el login HTTP implementado.
-3. Implementar firmware y validar LCD/Wi-Fi/TLS en la placa real.
+3. Validar el firmware en la placa real: LCD, Wi-Fi y TLS.
 4. Validar Cursor con una sesión real; evaluar acceso sin admin en Kiro.
 5. Validar Claude con una cuenta real; reemplazarlo si Anthropic publica una vía oficial.
 6. Diseñar, imprimir y verificar carcasa.
 
 ## Decisiones abiertas
 
-- Toolchain del firmware y librería de UI.
 - Frescura por cupo si hay observaciones independientes.
 - Tokens individuales por recolector y permisos por cuenta.
 - Modelo paramétrico de carcasa (OpenSCAD o CAD equivalente).

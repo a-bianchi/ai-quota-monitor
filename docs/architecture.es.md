@@ -16,7 +16,7 @@ flowchart LR
     end
     D[("DATA_DIR")]
     W["Panel web"]
-    E["Display ESP32<br/>(pendiente)"]
+    E["Display ESP32"]
 
     P --> L
     C -- "PUT /accounts/{id}/usage" --> H
@@ -67,7 +67,7 @@ Los archivos JSON se escriben de forma atómica. El diseño asume una sola insta
 ├── Makefile                  Comandos de compilación, pruebas y ejecución
 ├── docs/                     Documentación, capturas y colección de Postman
 ├── enclosure/                Carcasa (pendiente de diseño)
-├── firmware/                 Firmware del ESP32 (pendiente)
+├── firmware/                 Firmware del ESP32
 └── server/
     ├── Dockerfile
     ├── .env.example
