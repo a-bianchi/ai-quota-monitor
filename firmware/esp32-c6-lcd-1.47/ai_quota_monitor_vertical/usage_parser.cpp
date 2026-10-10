@@ -5,6 +5,7 @@ void usageFilter(JsonDocument &filter) {
   filter["generatedAt"] = true;
   JsonObject account = filter["accounts"][0].to<JsonObject>();
   account["name"] = true;
+  account["provider"] = true;
   account["scope"] = true;
   account["source"] = true;
   account["status"] = true;
@@ -136,6 +137,13 @@ bool parseUsage(JsonVariantConst root, Snapshot &out) {
     }
     Account &a = out.accounts[out.accountCount++];
     foldText(item["name"].as<const char *>(), a.name, sizeof(a.name));
+    const char *provider = item["provider"].as<const char *>();
+    a.provider = is(provider, "anthropic") ? PROVIDER_ANTHROPIC
+                 : is(provider, "openai") ? PROVIDER_OPENAI
+                 : is(provider, "cursor") ? PROVIDER_CURSOR
+                 : is(provider, "openrouter") ? PROVIDER_OPENROUTER
+                 : is(provider, "kiro") ? PROVIDER_KIRO
+                 : PROVIDER_OTHER;
     a.work = is(scope, "work");
     a.mock = is(item["source"].as<const char *>(), "mock");
     const char *status = item["status"].as<const char *>();

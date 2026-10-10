@@ -252,6 +252,7 @@ Para leer los mensajes de la placa, poné **Herramientas → USB CDC On Boot →
 - `net.cpp`: Wi-Fi y consultas, en su propia tarea, para que la pantalla siga refrescando durante una consulta. Timeouts de 8 s para conectar y 10 s para leer.
 - `usage_parser.cpp`: lee el contrato de `GET /usage` descrito en la [referencia de la API](api.es.md).
 - `ui.cpp`: páginas y dibujo con LVGL.
+- `logos.cpp`: logos de los providers, generado por `firmware/esp32-c6-lcd-1.47/tools/make_logos.py` a partir de `server/internal/web/static/logos/`. Para cambiar un logo, reemplazá la imagen y corré el script (usa `sips`, de macOS).
 - `Display_ST7789.*`, `LVGL_Driver.*`: drivers de pantalla adaptados del demo oficial de Waveshare. Ver [`NOTICE.md`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/NOTICE.md).
 
 El servidor responde `GET /usage` con lo que tiene guardado; leerlo desde la placa nunca dispara una consulta a un proveedor. La placa lee cada 60 segundos.

@@ -3,6 +3,7 @@
 #include <lvgl.h>
 #include <stdio.h>
 #include "Display_ST7789.h"
+#include "logos.h"
 #include "net.h"
 #include "settings.h"
 
@@ -12,7 +13,8 @@ static const int SCREEN_W = LCD_WIDTH;
 static const int SCREEN_H = LCD_HEIGHT;
 
 #if UI_ONE_ACCOUNT
-// One account per page: 16 px titles, 14 px quotas, 12 px details.
+// One account per page: 16 px titles, 14 px quotas, 12 px details. The account
+// shows a large logo with its name and provider beside it.
 #define FONT_TEXT (&lv_font_montserrat_14)
 #define FONT_SMALL (&lv_font_montserrat_12)
 #if LV_FONT_MONTSERRAT_16
@@ -29,6 +31,9 @@ static const int SMALL_H = 15;  // line height of the 12 px font
 static const int PAD_X = 8;
 static const int BAR_H = 6;
 static const int CARD_GAP = 0;  // nothing follows the only account
+static const int LOGO = LOGO_LARGE;
+static const int LOGO_GAP = 8;
+static const int ACCOUNT_H = 32;  // logo, or name and provider lines
 #else
 // Every account of a scope: 14 px title, 12 px for the rest.
 #define FONT_TEXT (&lv_font_montserrat_12)
@@ -42,6 +47,9 @@ static const int SMALL_H = 15;
 static const int PAD_X = 6;
 static const int BAR_H = 4;
 static const int CARD_GAP = 9;  // space, separator line and space
+static const int LOGO = LOGO_SMALL;
+static const int LOGO_GAP = 4;
+static const int ACCOUNT_H = NAME_H;
 #endif
 
 static const int PAD_Y = DISPLAY_LANDSCAPE ? 6 : 8;
@@ -228,7 +236,7 @@ static void paginate(bool work) {
       if (chunkCount >= MAX_CHUNKS) {
         return;
       }
-      Chunk c = { (uint8_t)i, (uint8_t)(a.firstQuota + next), 0, false, (uint16_t)(NAME_H + CARD_GAP) };
+      Chunk c = { (uint8_t)i, (uint8_t)(a.firstQuota + next), 0, false, (uint16_t)(ACCOUNT_H + CARD_GAP) };
       if (a.quotaCount == 0) {
         c.height += ROW_H;
       }
@@ -359,6 +367,36 @@ static void renderMessage() {
   lv_label_set_text(hint, linkHint());
 }
 
+static const char *providerName(Provider provider) {
+  switch (provider) {
+    case PROVIDER_ANTHROPIC: return "Claude";
+    case PROVIDER_OPENAI: return "Codex (ChatGPT)";
+    case PROVIDER_CURSOR: return "Cursor";
+    case PROVIDER_OPENROUTER: return "OpenRouter";
+    case PROVIDER_KIRO: return "Kiro";
+    default: return "";
+  }
+}
+
+// Provider logo, or a tile with the initial of the account when it has none.
+static void renderLogo(const Account &a, int x, int y) {
+  const lv_img_dsc_t *image = logoFor(a.provider, UI_ONE_ACCOUNT);
+  if (image) {
+    lv_obj_t *img = lv_img_create(lv_scr_act());
+    lv_img_set_src(img, image);
+    lv_obj_set_pos(img, x, y);
+    return;
+  }
+  const lv_font_t *font = UI_ONE_ACCOUNT ? FONT_TITLE : FONT_SMALL;
+  char initial[2] = { a.name[0] ? a.name[0] : '?', 0 };
+  if (initial[0] >= 'a' && initial[0] <= 'z') {
+    initial[0] -= 'a' - 'A';
+  }
+  rect(x, y, LOGO, LOGO, COLOR_LINE, LOGO / 4);
+  line(initial, font, COLOR_TEXT, x, y + (LOGO - lv_font_get_line_height(font)) / 2, LOGO, LV_TEXT_ALIGN_CENTER);
+}
+
+// Logo, account name and status; with UI_ONE_ACCOUNT, the provider below the name.
 static void renderStatus(const Account &a, int y) {
   Status status = a.status;
   if (markedStale && status == STATUS_OK) {
@@ -382,7 +420,13 @@ static void renderStatus(const Account &a, int y) {
     default:
       break;
   }
-  pair(a.name, FONT_NAME, COLOR_TEXT, text, FONT_TEXT, color, PAD_X, y, INNER_W);
+  int x = PAD_X + LOGO + LOGO_GAP;
+  int w = INNER_W - LOGO - LOGO_GAP;
+  renderLogo(a, PAD_X, y + (ACCOUNT_H - LOGO) / 2);
+  pair(a.name, FONT_NAME, COLOR_TEXT, text, FONT_TEXT, color, x, y, w);
+  if (UI_ONE_ACCOUNT) {
+    line(providerName(a.provider), FONT_SMALL, COLOR_MUTED, x, y + ACCOUNT_H - SMALL_H, w);
+  }
 }
 
 static void renderQuota(const Quota &q, int x, int y, int w) {
@@ -419,7 +463,7 @@ static void updatedText(char *out, size_t size, const Account &a) {
 static int renderChunk(const Chunk &c, int y) {
   const Account &a = view.data.accounts[c.account];
   renderStatus(a, y);
-  y += NAME_H;
+  y += ACCOUNT_H;
   if (a.quotaCount == 0) {
     line(tr("Sin cupos todavia", "No quotas yet"), FONT_TEXT, COLOR_MUTED, PAD_X, y, INNER_W);
     y += ROW_H;

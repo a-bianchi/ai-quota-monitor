@@ -9,6 +9,8 @@
 
 enum Level : uint8_t { LEVEL_UNKNOWN, LEVEL_LOW, LEVEL_MEDIUM, LEVEL_HIGH };
 enum Status : uint8_t { STATUS_OK, STATUS_STALE, STATUS_AUTH_REQUIRED, STATUS_UNAVAILABLE };
+// logos.cpp is indexed by this order: keep tools/make_logos.py in step.
+enum Provider : uint8_t { PROVIDER_OTHER, PROVIDER_ANTHROPIC, PROVIDER_OPENAI, PROVIDER_CURSOR, PROVIDER_OPENROUTER, PROVIDER_KIRO };
 enum Unit : uint8_t { UNIT_PERCENT, UNIT_CREDITS, UNIT_USD, UNIT_TOKENS, UNIT_OTHER };
 
 struct Quota {
@@ -24,6 +26,7 @@ struct Quota {
 
 struct Account {
   char name[NAME_LEN];
+  Provider provider;
   bool work;
   bool mock;
   Status status;
