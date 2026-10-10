@@ -30,7 +30,9 @@
     "noAccounts": "No accounts configured in this group.", "noData": "No quotas to show yet."
   },
   "display": {
-    "title": "Display", "note": "Preview of the content planned for the ESP32 screen (172 × 320 px), with real data from the API.",
+    "title": "Display", "note": "Preview of the content planned for the ESP32 screen (172 × 320 px, or 320 × 172 px in landscape), with real data from the API.",
+    "layout": "Layout", "layoutAll": "Full", "layoutSingleV": "Single · portrait", "layoutSingleH": "Single · landscape",
+    "account": "Account", "prev": "Previous account", "next": "Next account",
     "page": "Page", "scale": "Scale", "rotate": "Switch every 10 s", "screen": "Device screen",
     "noAccounts": "No accounts", "noData": "No data", "updated": "Upd. {time}"
   },

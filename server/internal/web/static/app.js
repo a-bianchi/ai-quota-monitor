@@ -3,7 +3,7 @@
 (() => {
   'use strict';
 
-  const KEYS = { access: 'aqm.accessToken', refresh: 'aqm.refreshToken', expires: 'aqm.accessExpiresAt', lang: 'aqm.lang', scale: 'aqm.displayScale' };
+  const KEYS = { access: 'aqm.accessToken', refresh: 'aqm.refreshToken', expires: 'aqm.accessExpiresAt', lang: 'aqm.lang', scale: 'aqm.displayScale', layout: 'aqm.displayLayout' };
   const LANGUAGES = ['es', 'en'];
   const DEFAULT_LANGUAGE = 'es';
   // Renew this long before the access token expires.
@@ -11,6 +11,8 @@
   const USAGE_POLL_MS = 60 * 1000;
   const LOGIN_POLL_MS = 3 * 1000;
   const ROTATE_MS = 10 * 1000;
+  // all: every account of a scope. single-*: one account at a time, larger text.
+  const LAYOUTS = ['all', 'single-v', 'single-h'];
   const STATUS_ICONS = { ok: '✓', stale: '↻', auth_required: '⚠', unavailable: '✕' };
 
   const store = {
@@ -146,7 +148,7 @@
       view: 'dashboard',
       login: { busy: false, error: '' },
       usage: { loading: false, loaded: false, error: '', raw: [], groups: [], checkedText: '' },
-      display: { scope: 'personal', scale: 2, rotate: false, clock: '' },
+      display: { scope: 'personal', scale: 2, rotate: false, clock: '', layout: 'all', index: 0 },
       settings: { loading: false, loaded: false, error: '', storage: true, raw: [], flows: {}, accounts: [] },
       timers: { renew: 0, usage: 0, rotate: 0, clock: 0, login: {} },
 
@@ -155,6 +157,8 @@
         await this.loadLanguage(LANGUAGES.includes(saved) ? saved : DEFAULT_LANGUAGE);
         const scale = Number(store.get(KEYS.scale));
         if ([1, 2, 3].includes(scale)) this.display.scale = scale;
+        const layout = store.get(KEYS.layout);
+        if (LAYOUTS.includes(layout)) this.display.layout = layout;
         this.route();
         window.addEventListener('hashchange', () => this.route());
         // Keep tabs in sync when another one logs in or out.
@@ -384,6 +388,7 @@
         return {
           id: account.id,
           name: account.name,
+          scope: account.scope,
           providerLabel: this.tr('provider.' + account.provider),
           mock: account.source === 'mock',
           statusClass: 'status status-' + status,
@@ -395,6 +400,7 @@
           updatedText: account.updatedAt ? this.tr('common.updated', { time: this.time(account.updatedAt) }) : this.tr('common.never'),
           updatedShort: account.updatedAt ? this.tr('display.updated', { time: this.time(account.updatedAt, { timeStyle: 'short' }) }) : '',
           quotas,
+          deviceCardClass: quotas.length > 2 ? 'd-card d-many' : 'd-card',
           empty: quotas.length === 0,
         };
       },
@@ -447,7 +453,33 @@
       },
       scopeClass(scope) { return this.display.scope === scope ? 'active' : ''; },
       scopePressed(scope) { return this.display.scope === scope ? 'true' : 'false'; },
-      setScope(scope) { this.display.scope = scope; },
+      setScope(scope) {
+        this.display.scope = scope;
+        const first = this.allAccounts.findIndex((a) => a.scope === scope);
+        if (first >= 0) this.display.index = first;
+      },
+      get singleLayout() { return this.display.layout !== 'all'; },
+      layoutClass(layout) { return this.display.layout === layout ? 'active' : ''; },
+      layoutPressed(layout) { return this.display.layout === layout ? 'true' : 'false'; },
+      setLayout(layout) {
+        this.display.layout = layout;
+        store.set(KEYS.layout, layout);
+        this.setScope(this.display.scope);
+      },
+      get allAccounts() { return this.usage.groups.flatMap((g) => g.accounts); },
+      get currentAccount() {
+        const all = this.allAccounts;
+        return all.length ? all[this.display.index % all.length] : null;
+      },
+      // Single layouts walk every account, personal first and then work.
+      stepAccount(delta) {
+        const all = this.allAccounts;
+        if (!all.length) return;
+        this.display.index = ((this.display.index % all.length) + delta + all.length) % all.length;
+        this.display.scope = all[this.display.index].scope;
+      },
+      prevAccount() { this.stepAccount(-1); },
+      nextAccount() { this.stepAccount(1); },
       scaleClass(scale) { return this.display.scale === scale ? 'active' : ''; },
       setScale(scale) {
         this.display.scale = scale;
@@ -458,15 +490,27 @@
         window.clearInterval(this.timers.rotate);
         if (this.display.rotate) {
           this.timers.rotate = window.setInterval(() => {
-            this.display.scope = this.display.scope === 'personal' ? 'work' : 'personal';
+            if (this.singleLayout) this.stepAccount(1);
+            else this.display.scope = this.display.scope === 'personal' ? 'work' : 'personal';
           }, ROTATE_MS);
         }
       },
-      get deviceWrapClass() { return 'device-wrap scale-' + this.display.scale; },
-      get deviceClass() { return 'device ' + this.display.scope; },
+      get deviceWrapClass() { return 'device-wrap scale-' + this.display.scale + (this.display.layout === 'single-h' ? ' land' : ''); },
+      get deviceClass() {
+        const layout = { all: '', 'single-v': ' single', 'single-h': ' single land' }[this.display.layout];
+        return 'device ' + this.display.scope + layout;
+      },
+      get deviceCounter() {
+        const total = this.allAccounts.length;
+        return this.singleLayout && total > 1 ? ((this.display.index % total) + 1) + '/' + total : '';
+      },
       get deviceTitle() { return this.tr('scope.' + this.display.scope).toUpperCase(); },
       get deviceClock() { return this.display.clock; },
       get deviceAccounts() {
+        if (this.singleLayout) {
+          const current = this.currentAccount;
+          return current && current.scope === this.display.scope ? [current] : [];
+        }
         const group = this.usage.groups.find((g) => g.scope === this.display.scope);
         return group ? group.accounts : [];
       },

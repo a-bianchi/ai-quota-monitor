@@ -30,7 +30,9 @@
     "noAccounts": "No hay cuentas configuradas en este grupo.", "noData": "Todavía no hay cupos para mostrar."
   },
   "display": {
-    "title": "Display", "note": "Vista previa del contenido previsto para la pantalla del ESP32 (172 × 320 px), con los datos reales de la API.",
+    "title": "Display", "note": "Vista previa del contenido previsto para la pantalla del ESP32 (172 × 320 px, o 320 × 172 px en horizontal), con los datos reales de la API.",
+    "layout": "Vista", "layoutAll": "Completa", "layoutSingleV": "Una · vertical", "layoutSingleH": "Una · horizontal",
+    "account": "Cuenta", "prev": "Cuenta anterior", "next": "Cuenta siguiente",
     "page": "Página", "scale": "Escala", "rotate": "Alternar cada 10 s", "screen": "Pantalla del dispositivo",
     "noAccounts": "Sin cuentas", "noData": "Sin datos", "updated": "Act. {time}"
   },

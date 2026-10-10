@@ -111,6 +111,11 @@
       <p class="muted" x-text="tr('display.note')"></p>
       <p class="alert" role="alert" x-show="usage.error" x-text="usage.error"></p>
       <div class="controls">
+        <div class="seg" role="group" x-bind:aria-label="tr('display.layout')">
+          <button type="button" x-bind:class="layoutClass('all')" x-bind:aria-pressed="layoutPressed('all')" x-on:click="setLayout('all')" x-text="tr('display.layoutAll')"></button>
+          <button type="button" x-bind:class="layoutClass('single-v')" x-bind:aria-pressed="layoutPressed('single-v')" x-on:click="setLayout('single-v')" x-text="tr('display.layoutSingleV')"></button>
+          <button type="button" x-bind:class="layoutClass('single-h')" x-bind:aria-pressed="layoutPressed('single-h')" x-on:click="setLayout('single-h')" x-text="tr('display.layoutSingleH')"></button>
+        </div>
         <div class="seg" role="group" x-bind:aria-label="tr('display.page')">
           <button type="button" x-bind:class="scopeClass('personal')" x-bind:aria-pressed="scopePressed('personal')" x-on:click="setScope('personal')" x-text="tr('scope.personal')"></button>
           <button type="button" x-bind:class="scopeClass('work')" x-bind:aria-pressed="scopePressed('work')" x-on:click="setScope('work')" x-text="tr('scope.work')"></button>
@@ -119,6 +124,10 @@
           <button type="button" x-bind:class="scaleClass(1)" x-on:click="setScale(1)">1×</button>
           <button type="button" x-bind:class="scaleClass(2)" x-on:click="setScale(2)">2×</button>
           <button type="button" x-bind:class="scaleClass(3)" x-on:click="setScale(3)">3×</button>
+        </div>
+        <div class="seg" role="group" x-show="singleLayout" x-bind:aria-label="tr('display.account')">
+          <button type="button" x-on:click="prevAccount()" x-bind:aria-label="tr('display.prev')">‹</button>
+          <button type="button" x-on:click="nextAccount()" x-bind:aria-label="tr('display.next')">›</button>
         </div>
         <label class="check">
           <input type="checkbox" x-on:change="setRotate($event.target.checked)" x-bind:checked="display.rotate">
@@ -129,27 +138,30 @@
         <div x-bind:class="deviceClass" x-bind:aria-label="tr('display.screen')">
           <div class="d-head">
             <span x-text="deviceTitle"></span>
+            <span x-show="deviceCounter" x-text="deviceCounter"></span>
             <span x-text="deviceClock"></span>
           </div>
           <p class="d-empty" x-show="deviceLoading" x-text="tr('common.loading')"></p>
           <p class="d-empty" x-show="deviceEmpty" x-text="tr('display.noAccounts')"></p>
           <template x-for="account in deviceAccounts" x-bind:key="account.id">
-            <div class="d-card">
+            <div x-bind:class="account.deviceCardClass">
               <div class="d-row">
                 <span class="d-name" x-text="account.name"></span>
                 <span x-bind:class="account.deviceStatusClass" x-text="account.deviceStatus"></span>
               </div>
               <p class="d-empty" x-show="account.empty" x-text="tr('display.noData')"></p>
-              <template x-for="quota in account.quotas" x-bind:key="quota.id">
-                <div>
-                  <div class="d-row d-quota">
-                    <span x-text="quota.name"></span>
-                    <span x-text="quota.leftShort"></span>
+              <div class="d-quotas">
+                <template x-for="quota in account.quotas" x-bind:key="quota.id">
+                  <div>
+                    <div class="d-row d-quota">
+                      <span x-text="quota.name"></span>
+                      <span x-text="quota.leftShort"></span>
+                    </div>
+                    <progress max="100" x-show="quota.hasBar" x-bind:value="quota.percent" x-bind:class="quota.level"></progress>
+                    <div class="d-reset" x-show="quota.resetShort" x-text="quota.resetShort"></div>
                   </div>
-                  <progress max="100" x-show="quota.hasBar" x-bind:value="quota.percent" x-bind:class="quota.level"></progress>
-                  <div class="d-reset" x-show="quota.resetShort" x-text="quota.resetShort"></div>
-                </div>
-              </template>
+                </template>
+              </div>
               <div class="d-reset" x-text="account.updatedShort"></div>
             </div>
           </template>
