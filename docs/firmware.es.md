@@ -4,7 +4,7 @@
 
 Firmware para la **Waveshare ESP32-C6-LCD-1.47** (sin touch). Se conecta a tu Wi-Fi, lee `GET /usage` de tu propio servidor y muestra los cupos personales y laborales, cambiando de página cada 10 segundos.
 
-El sketch está en [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor/).
+Hay dos sketches, uno por orientación de la pantalla: [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/) (172 × 320) y [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/) (320 × 172). Los dos muestran una cuenta por página, con letra grande. Subí a la placa el que corresponda a cómo la vas a apoyar.
 
 ![Pantallas renderizadas en una computadora con el código de dibujo del firmware](assets/firmware-preview.png)
 
@@ -135,17 +135,20 @@ La placa se reinicia sola y la pantalla muestra el demo del fabricante. Si lo ha
 
 ### 12. Abrir el sketch de este proyecto
 
-Conseguí el repositorio (con `git clone`, o **Code → Download ZIP** en la página del repositorio) y, en Arduino IDE, abrí:
+Conseguí el repositorio (con `git clone`, o **Code → Download ZIP** en la página del repositorio) y, en Arduino IDE, abrí uno de los dos sketches:
 
 ```text
-firmware/esp32-c6-lcd-1.47/ai_quota_monitor/ai_quota_monitor.ino
+firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/ai_quota_monitor_vertical.ino
+firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/ai_quota_monitor_horizontal.ino
 ```
+
+Lo único que cambia entre ellos es `layout.h`. Ahí también podés girar la imagen 180° (`DISPLAY_FLIP 1`) si la placa queda al revés, o volver a la vista con todas las cuentas de un grupo en letra chica (`UI_ONE_ACCOUNT 0`).
 
 La carpeta y el archivo `.ino` tienen que conservar el mismo nombre. No saques el `.ino` de su carpeta: los archivos que están al lado son parte del programa.
 
 ### 13. Configurar Wi-Fi, API y token
 
-1. En `firmware/esp32-c6-lcd-1.47/ai_quota_monitor/`, copiá `config.example.h` a un archivo nuevo llamado `config.h`, en esa misma carpeta.
+1. En la carpeta del sketch que abriste, copiá `config.example.h` a un archivo nuevo llamado `config.h`, en esa misma carpeta.
 2. Abrí `config.h` y completá los valores. Arduino IDE lo muestra como una pestaña cuando existe; si no aparece, volvé a abrir el sketch.
 
 | Ajuste | Qué poner |
@@ -244,11 +247,12 @@ Para leer los mensajes de la placa, poné **Herramientas → USB CDC On Boot →
 
 ## Cómo está armado
 
-- `ai_quota_monitor.ino`: arranque y bucle de dibujo.
+- `ai_quota_monitor_vertical.ino` / `ai_quota_monitor_horizontal.ino`: arranque y bucle de dibujo.
+- `layout.h`: orientación de la pantalla y tipo de página. Es el único archivo distinto entre los dos sketches; el resto se mantiene igual en ambas carpetas.
 - `net.cpp`: Wi-Fi y consultas, en su propia tarea, para que la pantalla siga refrescando durante una consulta. Timeouts de 8 s para conectar y 10 s para leer.
 - `usage_parser.cpp`: lee el contrato de `GET /usage` descrito en la [referencia de la API](api.es.md).
 - `ui.cpp`: páginas y dibujo con LVGL.
-- `Display_ST7789.*`, `LVGL_Driver.*`: drivers de pantalla adaptados del demo oficial de Waveshare. Ver [`NOTICE.md`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor/NOTICE.md).
+- `Display_ST7789.*`, `LVGL_Driver.*`: drivers de pantalla adaptados del demo oficial de Waveshare. Ver [`NOTICE.md`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/NOTICE.md).
 
 El servidor responde `GET /usage` con lo que tiene guardado; leerlo desde la placa nunca dispara una consulta a un proveedor. La placa lee cada 60 segundos.
 

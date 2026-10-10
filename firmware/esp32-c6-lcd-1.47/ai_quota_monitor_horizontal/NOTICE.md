@@ -4,7 +4,7 @@
 
 https://files.waveshare.com/wiki/ESP32-C6-LCD-1.47/ESP32-C6-LCD-1.47-Demo.zip
 
-The pins, the SPI settings and the ST7789 initialisation sequence are the manufacturer's. Changes: SD card, RGB, wireless test and LVGL demo code removed; the dummy touch input removed; pixel data sent with `SPI.writeBytes`. The example sources in that ZIP carry no license header or license file; they are credited here to Waveshare.
+The pins, the SPI settings and the ST7789 initialisation sequence are the manufacturer's. Changes: SD card, RGB, wireless test and LVGL demo code removed; the dummy touch input removed; pixel data sent with `SPI.writeBytes`; orientation chosen in `layout.h`. The example sources in that ZIP carry no license header or license file; they are credited here to Waveshare.
 
 Libraries are not copied into this repository. They are installed separately and keep their own licenses:
 

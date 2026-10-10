@@ -1,6 +1,8 @@
 // AI Quota Monitor for the Waveshare ESP32-C6-LCD-1.47 (no touch).
 //
 // Reads GET /usage from your own server and shows the personal and work quotas.
+// Vertical sketch: 172 x 320 screen. layout.h holds what differs from
+// ai_quota_monitor_horizontal; every other file is the same in both.
 // Setup, libraries and flashing: docs/firmware.md in the repository.
 //
 // Board: ESP32C6 Dev Module. Partition Scheme: Huge APP (3MB No OTA/1MB SPIFFS).

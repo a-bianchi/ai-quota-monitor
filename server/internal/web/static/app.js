@@ -13,6 +13,8 @@
   const ROTATE_MS = 10 * 1000;
   // all: every account of a scope. single-*: one account at a time, larger text.
   const LAYOUTS = ['all', 'single-v', 'single-h'];
+  // Providers with a logo in static/logos/<provider>.jpg; the rest show their initial.
+  const LOGOS = ['anthropic', 'openai', 'cursor', 'openrouter'];
   const STATUS_ICONS = { ok: '✓', stale: '↻', auth_required: '⚠', unavailable: '✕' };
 
   const store = {
@@ -385,11 +387,15 @@
       accountView(account) {
         const status = ['ok', 'stale', 'auth_required', 'unavailable'].includes(account.status) ? account.status : 'unavailable';
         const quotas = (Array.isArray(account.quotas) ? account.quotas : []).map((q) => this.quotaView(q));
+        const logo = LOGOS.includes(account.provider) ? '/static/logos/' + account.provider + '.jpg' : '';
         return {
           id: account.id,
           name: account.name,
           scope: account.scope,
           providerLabel: this.tr('provider.' + account.provider),
+          logo,
+          noLogo: !logo,
+          initial: String(account.name || '?').charAt(0).toUpperCase(),
           mock: account.source === 'mock',
           statusClass: 'status status-' + status,
           statusIcon: STATUS_ICONS[status],

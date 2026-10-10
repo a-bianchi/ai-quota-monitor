@@ -145,8 +145,13 @@
           <p class="d-empty" x-show="deviceEmpty" x-text="tr('display.noAccounts')"></p>
           <template x-for="account in deviceAccounts" x-bind:key="account.id">
             <div x-bind:class="account.deviceCardClass">
-              <div class="d-row">
-                <span class="d-name" x-text="account.name"></span>
+              <div class="d-row d-title">
+                <template x-if="account.logo"><img class="d-logo" x-bind:src="account.logo" alt=""></template>
+                <template x-if="account.noLogo"><span class="d-logo d-logo-text" x-text="account.initial"></span></template>
+                <span class="d-id">
+                  <span class="d-name" x-text="account.name"></span>
+                  <span class="d-provider" x-text="account.providerLabel"></span>
+                </span>
                 <span x-bind:class="account.deviceStatusClass" x-text="account.deviceStatus"></span>
               </div>
               <p class="d-empty" x-show="account.empty" x-text="tr('display.noData')"></p>

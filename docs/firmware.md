@@ -4,7 +4,7 @@
 
 Firmware for the **Waveshare ESP32-C6-LCD-1.47** (no touch). It connects to your Wi-Fi, reads `GET /usage` from your own server and shows the personal and work quotas, switching page every 10 seconds.
 
-The sketch is in [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor/).
+There are two sketches, one per screen orientation: [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/) (172 × 320) and [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/) (320 × 172). Both show one account per page, in large text. Upload the one that matches how the board will stand.
 
 ![Screens rendered on a computer with the firmware's own drawing code](assets/firmware-preview.png)
 
@@ -138,14 +138,17 @@ The board restarts by itself and the screen shows the manufacturer's demo. If it
 Get the repository (with `git clone`, or **Code → Download ZIP** on the repository page) and, in Arduino IDE, open:
 
 ```text
-firmware/esp32-c6-lcd-1.47/ai_quota_monitor/ai_quota_monitor.ino
+firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/ai_quota_monitor_vertical.ino
+firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/ai_quota_monitor_horizontal.ino
 ```
+
+Open one of the two. The only thing that changes between them is `layout.h`. There you can also turn the picture 180° (`DISPLAY_FLIP 1`) if the board ends up upside down, or go back to the view with every account of a group in small text (`UI_ONE_ACCOUNT 0`).
 
 The folder and the `.ino` file must keep the same name. Do not move the `.ino` out of its folder: the files next to it are part of the program.
 
 ### 13. Configure Wi-Fi, API and token
 
-1. In `firmware/esp32-c6-lcd-1.47/ai_quota_monitor/`, copy `config.example.h` to a new file called `config.h` in that same folder.
+1. In the folder of the sketch you opened, copy `config.example.h` to a new file called `config.h` in that same folder.
 2. Open `config.h` and fill in the values. Arduino IDE shows it as a tab once it exists; reopen the sketch if it does not.
 
 | Setting | What to put |
@@ -244,11 +247,12 @@ To read the board's messages, set **Tools → USB CDC On Boot → Enabled**, upl
 
 ## How it is built
 
-- `ai_quota_monitor.ino`: start-up and the drawing loop.
+- `ai_quota_monitor_vertical.ino` / `ai_quota_monitor_horizontal.ino`: start-up and the drawing loop.
+- `layout.h`: screen orientation and page type. It is the only file that differs between the two sketches; the rest is kept identical in both folders.
 - `net.cpp`: Wi-Fi and the requests, in their own task, so the screen keeps refreshing during a request. Timeouts of 8 s to connect and 10 s to read.
 - `usage_parser.cpp`: reads the `GET /usage` contract described in the [API reference](api.md).
 - `ui.cpp`: pages and drawing with LVGL.
-- `Display_ST7789.*`, `LVGL_Driver.*`: screen drivers adapted from the official Waveshare demo. See [`NOTICE.md`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor/NOTICE.md).
+- `Display_ST7789.*`, `LVGL_Driver.*`: screen drivers adapted from the official Waveshare demo. See [`NOTICE.md`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/NOTICE.md).
 
 The server answers `GET /usage` from what it has stored; reading it from the board never triggers a request to a provider. The board reads every 60 seconds.
 

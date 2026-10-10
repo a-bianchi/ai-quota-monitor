@@ -1,4 +1,4 @@
-// Screen content: one page per scope (or more when it does not fit), rotating.
+// Screen content: rotating pages, laid out as layout.h says.
 #pragma once
 
 void uiBegin();

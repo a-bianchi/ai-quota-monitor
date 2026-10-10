@@ -54,8 +54,14 @@ void LCD_Init(void) {
   //************* Start Initial Sequence **********//
   LCD_WriteCommand(0x11);
   delay(120);
+  // MADCTL: orientation. 0x70 is the manufacturer's landscape value; the
+  // DISPLAY_FLIP values turn the same picture 180 degrees.
   LCD_WriteCommand(0x36);
-  LCD_WriteData(0x00);
+#if DISPLAY_LANDSCAPE
+  LCD_WriteData(DISPLAY_FLIP ? 0xA0 : 0x70);
+#else
+  LCD_WriteData(DISPLAY_FLIP ? 0xC0 : 0x00);
+#endif
 
   LCD_WriteCommand(0x3A);
   LCD_WriteData(0x05);
@@ -141,18 +147,22 @@ void LCD_Init(void) {
 
 void LCD_SetCursor(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend) {
   // set the X coordinates
+  Xstart += Offset_X;
+  Xend += Offset_X;
   LCD_WriteCommand(0x2A);
   LCD_WriteData(Xstart >> 8);
-  LCD_WriteData(Xstart + Offset_X);
+  LCD_WriteData(Xstart & 0xFF);
   LCD_WriteData(Xend >> 8);
-  LCD_WriteData(Xend + Offset_X);
+  LCD_WriteData(Xend & 0xFF);
 
   // set the Y coordinates
+  Ystart += Offset_Y;
+  Yend += Offset_Y;
   LCD_WriteCommand(0x2B);
   LCD_WriteData(Ystart >> 8);
-  LCD_WriteData(Ystart + Offset_Y);
+  LCD_WriteData(Ystart & 0xFF);
   LCD_WriteData(Yend >> 8);
-  LCD_WriteData(Yend + Offset_Y);
+  LCD_WriteData(Yend & 0xFF);
 
   LCD_WriteCommand(0x2C);
 }

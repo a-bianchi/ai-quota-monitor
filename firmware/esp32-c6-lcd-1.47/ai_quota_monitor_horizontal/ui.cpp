@@ -2,29 +2,60 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <stdio.h>
+#include "Display_ST7789.h"
 #include "net.h"
 #include "settings.h"
 
-// Layout for 172 x 320, following the Display view of the web panel.
-static const int SCREEN_W = 172;
-static const int SCREEN_H = 320;
-static const int PAD_X = 6;
-static const int PAD_Y = 8;
-static const int INNER_W = SCREEN_W - 2 * PAD_X;
-static const int ROW_H = 15;    // line height of the 12 px font
+// Layout for 172 x 320 or 320 x 172 (layout.h), following the Display view of
+// the web panel.
+static const int SCREEN_W = LCD_WIDTH;
+static const int SCREEN_H = LCD_HEIGHT;
+
+#if UI_ONE_ACCOUNT
+// One account per page: 16 px titles, 14 px quotas, 12 px details.
+#define FONT_TEXT (&lv_font_montserrat_14)
+#define FONT_SMALL (&lv_font_montserrat_12)
+#if LV_FONT_MONTSERRAT_16
+#define FONT_TITLE (&lv_font_montserrat_16)
+static const int TITLE_H = 18;  // line height of the 16 px font
+#else  // 16 px is not enabled in lv_conf.h
+#define FONT_TITLE FONT_TEXT
+static const int TITLE_H = 16;
+#endif
+#define FONT_NAME FONT_TITLE
+static const int NAME_H = TITLE_H;
+static const int ROW_H = 16;    // line height of the 14 px font
+static const int SMALL_H = 15;  // line height of the 12 px font
+static const int PAD_X = 8;
+static const int BAR_H = 6;
+static const int CARD_GAP = 0;  // nothing follows the only account
+#else
+// Every account of a scope: 14 px title, 12 px for the rest.
+#define FONT_TEXT (&lv_font_montserrat_12)
+#define FONT_SMALL FONT_TEXT
+#define FONT_TITLE (&lv_font_montserrat_14)
+#define FONT_NAME FONT_TEXT
 static const int TITLE_H = 16;  // line height of the 14 px font
+static const int NAME_H = 15;
+static const int ROW_H = 15;    // line height of the 12 px font
+static const int SMALL_H = 15;
+static const int PAD_X = 6;
 static const int BAR_H = 4;
 static const int CARD_GAP = 9;  // space, separator line and space
+#endif
+
+static const int PAD_Y = DISPLAY_LANDSCAPE ? 6 : 8;
+static const int INNER_W = SCREEN_W - 2 * PAD_X;
+static const int COL_GAP = 12;
 static const int CONTENT_TOP = PAD_Y + TITLE_H + 7;
-static const int FOOTER_Y = SCREEN_H - PAD_Y - ROW_H;
+static const int FOOTER_Y = SCREEN_H - PAD_Y - SMALL_H;
 static const int CONTENT_H = FOOTER_Y - 3 - CONTENT_TOP;
+// Landscape is short: with one account per page, its update line goes in the footer.
+static const bool TAIL_IN_FOOTER = DISPLAY_LANDSCAPE && UI_ONE_ACCOUNT;
 
 static const uint32_t ROTATE_MS = 10 * 1000;
 // Data kept after failed reads is marked as stale once it is this old.
 static const uint32_t STALE_MARK_MS = 150 * 1000;
-
-#define FONT_TEXT (&lv_font_montserrat_12)
-#define FONT_TITLE (&lv_font_montserrat_14)
 
 // Same palette as the panel; usageLevel picks green, orange, red or gray.
 #define COLOR_TEXT lv_color_hex(0xFFFFFF)
@@ -95,15 +126,18 @@ static lv_obj_t *line(const char *text, const lv_font_t *font, lv_color_t color,
   return label;
 }
 
-// Text on the left and a value on the right; the value is never clipped.
-static void pair(const char *left, lv_color_t leftColor, const char *right, lv_color_t rightColor, int y) {
-  int rightW = min(textWidth(right, FONT_TEXT) + 1, INNER_W);
+// Text on the left and a value on the right, inside w pixels from x; the value
+// is never clipped. A smaller right font sits on the baseline of the left one.
+static void pair(const char *left, const lv_font_t *leftFont, lv_color_t leftColor, const char *right,
+                 const lv_font_t *rightFont, lv_color_t rightColor, int x, int y, int w) {
+  int rightW = min(textWidth(right, rightFont) + 1, w);
   if (rightW > 1) {
-    line(right, FONT_TEXT, rightColor, PAD_X + INNER_W - rightW, y, rightW, LV_TEXT_ALIGN_RIGHT);
+    int drop = max(lv_font_get_line_height(leftFont) - lv_font_get_line_height(rightFont), 0);
+    line(right, rightFont, rightColor, x + w - rightW, y + drop, rightW, LV_TEXT_ALIGN_RIGHT);
   }
-  int leftW = INNER_W - rightW - 4;
+  int leftW = w - rightW - 4;
   if (leftW > 8) {
-    line(left, FONT_TEXT, leftColor, PAD_X, y, leftW);
+    line(left, leftFont, leftColor, x, y, leftW);
   }
 }
 
@@ -165,7 +199,12 @@ static bool hasBar(const Quota &q) {
 }
 
 static int quotaHeight(const Quota &q) {
-  return 2 + ROW_H + (hasBar(q) ? BAR_H + 3 : 0) + (q.reset[0] ? ROW_H : 0);
+  return 2 + ROW_H + (hasBar(q) ? BAR_H + 3 : 0) + (q.reset[0] ? SMALL_H : 0);
+}
+
+// Landscape has room for two quotas side by side.
+static int columns(const Account &a) {
+  return DISPLAY_LANDSCAPE && a.quotaCount > 2 ? 2 : 1;
 }
 
 static bool hasTail(const Account &a) {
@@ -173,7 +212,8 @@ static bool hasTail(const Account &a) {
 }
 
 // Splits the accounts of one scope into pages. An account that is taller than
-// the screen continues on the next page.
+// the screen continues on the next page. With UI_ONE_ACCOUNT every account
+// starts its own page.
 static void paginate(bool work) {
   int firstPage = pageCount;
   int used = CONTENT_H + 1;  // forces the first page
@@ -182,31 +222,37 @@ static void paginate(bool work) {
     if (a.work != work) {
       continue;
     }
+    int cols = columns(a);
     int next = 0;
     do {
       if (chunkCount >= MAX_CHUNKS) {
         return;
       }
-      Chunk c = { (uint8_t)i, (uint8_t)(a.firstQuota + next), 0, false, (uint16_t)(ROW_H + CARD_GAP) };
+      Chunk c = { (uint8_t)i, (uint8_t)(a.firstQuota + next), 0, false, (uint16_t)(NAME_H + CARD_GAP) };
       if (a.quotaCount == 0) {
         c.height += ROW_H;
       }
       while (next < a.quotaCount) {
-        int h = quotaHeight(view.data.quotas[a.firstQuota + next]);
+        // One row: as tall as its tallest quota.
+        int count = min(cols, a.quotaCount - next);
+        int h = 0;
+        for (int k = 0; k < count; k++) {
+          h = max(h, quotaHeight(view.data.quotas[a.firstQuota + next + k]));
+        }
         if (c.quotaCount > 0 && c.height + h > CONTENT_H) {
           break;
         }
         c.height += h;
-        c.quotaCount++;
-        next++;
+        c.quotaCount += count;
+        next += count;
       }
       if (next >= a.quotaCount) {
         c.tail = true;
-        if (hasTail(a)) {
-          c.height += 2 + ROW_H;
+        if (hasTail(a) && !TAIL_IN_FOOTER) {
+          c.height += 2 + SMALL_H;
         }
       }
-      if (used + c.height > CONTENT_H) {
+      if (UI_ONE_ACCOUNT || used + c.height > CONTENT_H) {
         if (pageCount >= MAX_PAGES) {
           return;
         }
@@ -301,14 +347,15 @@ static void renderMessage() {
   char buffer[32];
   line("AI Quota Monitor", FONT_TITLE, COLOR_PERSONAL, PAD_X, PAD_Y, INNER_W);
   rect(PAD_X, PAD_Y + TITLE_H + 2, INNER_W, 1, COLOR_PERSONAL);
-  line(linkText(buffer, sizeof(buffer)), FONT_TITLE, linkColor(), PAD_X, 96, INNER_W, LV_TEXT_ALIGN_CENTER);
+  int y = DISPLAY_LANDSCAPE ? 44 : 96;
+  line(linkText(buffer, sizeof(buffer)), FONT_TITLE, linkColor(), PAD_X, y, INNER_W, LV_TEXT_ALIGN_CENTER);
   lv_obj_t *hint = lv_label_create(lv_scr_act());
-  lv_obj_set_style_text_font(hint, FONT_TEXT, 0);
+  lv_obj_set_style_text_font(hint, FONT_SMALL, 0);
   lv_obj_set_style_text_color(hint, COLOR_MUTED, 0);
   lv_obj_set_style_text_align(hint, LV_TEXT_ALIGN_CENTER, 0);
   lv_label_set_long_mode(hint, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(hint, INNER_W);
-  lv_obj_set_pos(hint, PAD_X, 124);
+  lv_obj_set_pos(hint, PAD_X, y + 28);
   lv_label_set_text(hint, linkHint());
 }
 
@@ -335,51 +382,69 @@ static void renderStatus(const Account &a, int y) {
     default:
       break;
   }
-  pair(a.name, COLOR_TEXT, text, color, y);
+  pair(a.name, FONT_NAME, COLOR_TEXT, text, FONT_TEXT, color, PAD_X, y, INNER_W);
+}
+
+static void renderQuota(const Quota &q, int x, int y, int w) {
+  char value[40];
+  quotaValue(value, sizeof(value), q);
+  y += 2;
+  pair(q.name, FONT_TEXT, COLOR_MUTED, value, FONT_TEXT, levelColor(q.level), x, y, w);
+  y += ROW_H;
+  if (hasBar(q)) {
+    double percent = q.used / q.limit * 100;
+    percent = percent < 0 ? 0 : percent > 100 ? 100 : percent;
+    int filled = (int)(w * percent / 100 + 0.5);
+    rect(x, y + 1, w, BAR_H, COLOR_LINE, 2);
+    if (filled > 0) {
+      rect(x, y + 1, max(filled, 2), BAR_H, levelColor(q.level), 2);
+    }
+    y += BAR_H + 3;
+  }
+  if (q.reset[0]) {
+    char reset[32];
+    snprintf(reset, sizeof(reset), LV_SYMBOL_REFRESH " %s", q.reset);
+    line(reset, FONT_SMALL, COLOR_MUTED, x, y, w);
+  }
+}
+
+// "Act. 10/10 14:30", empty when the account was never updated.
+static void updatedText(char *out, size_t size, const Account &a) {
+  out[0] = 0;
+  if (a.updated[0]) {
+    snprintf(out, size, tr("Act. %s", "Upd. %s"), a.updated);
+  }
 }
 
 static int renderChunk(const Chunk &c, int y) {
   const Account &a = view.data.accounts[c.account];
   renderStatus(a, y);
-  y += ROW_H;
+  y += NAME_H;
   if (a.quotaCount == 0) {
     line(tr("Sin cupos todavia", "No quotas yet"), FONT_TEXT, COLOR_MUTED, PAD_X, y, INNER_W);
     y += ROW_H;
   }
-  for (int i = 0; i < c.quotaCount; i++) {
-    const Quota &q = view.data.quotas[c.firstQuota + i];
-    char value[40];
-    quotaValue(value, sizeof(value), q);
-    y += 2;
-    pair(q.name, COLOR_MUTED, value, levelColor(q.level), y);
-    y += ROW_H;
-    if (hasBar(q)) {
-      double percent = q.used / q.limit * 100;
-      percent = percent < 0 ? 0 : percent > 100 ? 100 : percent;
-      int filled = (int)(INNER_W * percent / 100 + 0.5);
-      rect(PAD_X, y + 1, INNER_W, BAR_H, COLOR_LINE, 2);
-      if (filled > 0) {
-        rect(PAD_X, y + 1, max(filled, 2), BAR_H, levelColor(q.level), 2);
-      }
-      y += BAR_H + 3;
+  int cols = columns(a);
+  int colW = cols > 1 ? (INNER_W - COL_GAP * (cols - 1)) / cols : INNER_W;
+  for (int i = 0; i < c.quotaCount; i += cols) {
+    int h = 0;
+    for (int k = 0; k < cols && i + k < c.quotaCount; k++) {
+      const Quota &q = view.data.quotas[c.firstQuota + i + k];
+      renderQuota(q, PAD_X + k * (colW + COL_GAP), y, colW);
+      h = max(h, quotaHeight(q));
     }
-    if (q.reset[0]) {
-      char reset[32];
-      snprintf(reset, sizeof(reset), LV_SYMBOL_REFRESH " %s", q.reset);
-      line(reset, FONT_TEXT, COLOR_MUTED, PAD_X, y, INNER_W);
-      y += ROW_H;
-    }
+    y += h;
   }
-  if (c.tail && hasTail(a)) {
-    char updated[32] = "";
-    if (a.updated[0]) {
-      snprintf(updated, sizeof(updated), tr("Act. %s", "Upd. %s"), a.updated);
-    }
+  if (c.tail && hasTail(a) && !TAIL_IN_FOOTER) {
+    char updated[32];
+    updatedText(updated, sizeof(updated), a);
     y += 2;
-    pair(updated, COLOR_MUTED, a.mock ? "MOCK" : "", COLOR_MEDIUM, y);
-    y += ROW_H;
+    pair(updated, FONT_SMALL, COLOR_MUTED, a.mock ? "MOCK" : "", FONT_SMALL, COLOR_MEDIUM, PAD_X, y, INNER_W);
+    y += SMALL_H;
   }
-  rect(PAD_X, y + 4, INNER_W, 1, lv_color_hex(0x222222));
+  if (CARD_GAP > 0) {
+    rect(PAD_X, y + 4, INNER_W, 1, lv_color_hex(0x222222));
+  }
   return y + CARD_GAP;
 }
 
@@ -393,7 +458,7 @@ static void renderPage() {
   int counterW = textWidth(counter, FONT_TEXT) + 1;
   line(page.work ? tr("TRABAJO", "WORK") : "PERSONAL", FONT_TITLE, scope, PAD_X, PAD_Y, INNER_W - counterW - 4);
   if (counter[0]) {
-    line(counter, FONT_TEXT, scope, PAD_X + INNER_W - counterW, PAD_Y + 1, counterW, LV_TEXT_ALIGN_RIGHT);
+    line(counter, FONT_TEXT, scope, PAD_X + INNER_W - counterW, PAD_Y + TITLE_H - ROW_H, counterW, LV_TEXT_ALIGN_RIGHT);
   }
   rect(PAD_X, PAD_Y + TITLE_H + 2, INNER_W, 1, scope);
 
@@ -408,13 +473,23 @@ static void renderPage() {
   // Footer: when the API was read, or why the data on screen is old.
   char buffer[32];
   char footer[48];
+  lv_color_t footerColor = COLOR_MUTED;
   if (view.link == LINK_OK) {
     snprintf(footer, sizeof(footer), tr("Leido %s", "Read %s"), view.data.readAt);
-    line(footer, FONT_TEXT, COLOR_MUTED, PAD_X, FOOTER_Y, INNER_W);
   } else {
     snprintf(footer, sizeof(footer), LV_SYMBOL_WARNING " %s", linkText(buffer, sizeof(buffer)));
-    line(footer, FONT_TEXT, linkColor(), PAD_X, FOOTER_Y, INNER_W);
+    footerColor = linkColor();
   }
+  char tail[48] = "";
+  bool mock = false;
+  if (TAIL_IN_FOOTER && page.chunkCount > 0) {
+    const Account &a = view.data.accounts[chunks[page.firstChunk].account];
+    char updated[32];
+    updatedText(updated, sizeof(updated), a);
+    mock = a.mock;
+    snprintf(tail, sizeof(tail), "%s%s", updated, mock ? " MOCK" : "");
+  }
+  pair(footer, FONT_SMALL, footerColor, tail, FONT_SMALL, mock ? COLOR_MEDIUM : COLOR_MUTED, PAD_X, FOOTER_Y, INNER_W);
 }
 
 static void render() {
