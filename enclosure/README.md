@@ -2,11 +2,15 @@
 
 **English** · [Español](README.es.md)
 
+![Printed enclosure in red, with the screen on and the USB-C cable plugged in on the side](../docs/assets/claudito.png)
+
+*The printed and assembled result.*
+
 ![Enclosure preview: front with the horizontal screen, side with the USB-C port and back with the snap-fit lid](preview.png)
 
 Desk enclosure for the [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.md), version 3: two parts, horizontal screen tilted 12° backwards and a snap-fit lid, without screws. It goes with the [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.md) sketch.
 
-Status: designed and printed on a Bambu Lab A1 mini. The image is a render produced by the model script, not a photo. Its labels and the file names are in Spanish.
+Status: designed and printed on a Bambu Lab A1 mini. The first image is a photo of the printed result; the second is a render produced by the model script. The render's labels and the file names are in Spanish.
 
 ## Files
 

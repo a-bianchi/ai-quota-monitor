@@ -2,11 +2,15 @@
 
 [English](README.md) · **Español**
 
+![Carcasa impresa en rojo, con la pantalla encendida y el cable USB-C conectado al costado](../docs/assets/claudito.png)
+
+*El resultado impreso y armado.*
+
 ![Vista previa de la carcasa: frente con la pantalla horizontal, lateral con el USB-C y parte trasera con la tapa a presión](preview.png)
 
 Carcasa de escritorio para la [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.es.md), versión 3: dos piezas, pantalla horizontal inclinada 12° hacia atrás y tapa a presión, sin tornillos. Va con el sketch [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.es.md).
 
-Estado: diseñada e impresa en una Bambu Lab A1 mini. La imagen es un render generado por el script del modelo, no una foto.
+Estado: diseñada e impresa en una Bambu Lab A1 mini. La primera imagen es una foto del resultado impreso; la segunda es un render generado por el script del modelo.
 
 ## Archivos
 

@@ -5,6 +5,10 @@
 [![Go](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml/badge.svg)](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 
+![Display de escritorio terminado: carcasa roja impresa en 3D con la pantalla del ESP32 mostrando los cupos de una cuenta](docs/assets/claudito.png)
+
+*El display de escritorio terminado: el ESP32 en su [carcasa impresa en 3D](enclosure/README.es.md), mostrando los cupos de una cuenta.*
+
 Monitor autohospedado de los cupos de tus servicios de IA. Una API en Go consulta a cada proveedor, guarda el último valor y lo muestra en un panel web y en un display físico ESP32 de escritorio. Separa las cuentas **personales** de las **laborales**.
 
 ![Tablero del panel web con cuentas de ejemplo](docs/assets/panel-dashboard.png)

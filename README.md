@@ -5,6 +5,10 @@
 [![Go](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml/badge.svg)](https://github.com/a-bianchi/ai-quota-monitor/actions/workflows/go.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+![Finished desk display: red 3D-printed enclosure with the ESP32 screen showing the quotas of an account](docs/assets/claudito.png)
+
+*The finished desk display: the ESP32 in its [3D-printed enclosure](enclosure/README.md), showing the quotas of an account.*
+
 Self-hosted monitor for the quotas of your AI services. A Go API polls each provider, stores the latest value and shows it in a web panel and on a physical ESP32 desk display. It keeps **personal** and **work** accounts apart.
 
 ![Web panel dashboard with example accounts](docs/assets/panel-dashboard.png)
