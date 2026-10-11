@@ -20,6 +20,12 @@
 #ifndef DISPLAY_BRIGHTNESS
 #define DISPLAY_BRIGHTNESS 40
 #endif
+#ifndef LED_BRIGHTNESS
+#define LED_BRIGHTNESS 10
+#endif
+#ifndef LED_COLOR_ORDER
+#define LED_COLOR_ORDER LED_COLOR_ORDER_RGB
+#endif
 
 static inline bool uiEnglish() {
   return strncmp(UI_LANGUAGE, "en", 2) == 0;

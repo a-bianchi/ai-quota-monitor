@@ -9,7 +9,7 @@ Initial bill of materials:
 - Waveshare ESP32-C6-LCD-1.47 board.
 - USB-C data cable for flashing and power.
 - USB port or compatible power supply.
-- Printed enclosure, pending design and validation.
+- Printed [enclosure](../enclosure/README.md), optional.
 
 MicroSD is not required for the MVP.
 
@@ -33,13 +33,14 @@ Listings and sellers change and these links may stop working. Before buying, che
 
 The screen, the RGB LED and the microSD slot are built into the board: there is nothing to wire or solder. The only cable is the USB-C one, which powers the board and is used to flash it.
 
-To program the board, follow the [firmware guide](firmware.md). There are no validated assembly instructions yet: they depend on the [enclosure](../enclosure/README.md), which is pending.
+To program the board, follow the [firmware guide](firmware.md). To mount it, see the [enclosure](../enclosure/README.md).
 
 ## Status and next steps
 
 - The official Waveshare demo was compiled, uploaded and shown on the real board, with the pins listed above.
-- The project [firmware](firmware.md) compiles; it has not been tested on a physical board yet.
-- Next step: flash the firmware and check screen, Wi-Fi and legibility.
+- The project [firmware](firmware.md) runs on the physical board.
+- The [enclosure](../enclosure/README.md) is designed and printed.
+- Next step: test HTTPS with a real certificate.
 - The **Display** view of the [web panel](panel.md) previews the same content in a browser.
 
 ## Sources

@@ -1,16 +1,69 @@
-# Enclosure — design pending
+# Enclosure
 
 **English** · [Español](README.es.md)
 
-Editable sources will be published in `source/` and STL files in `stl/` once the model is designed and tested. No fictitious STL files or assumed dimensions are included.
+![Enclosure preview: front with the horizontal screen, side with the USB-C port and back with the snap-fit lid](vista_previa.png)
 
-Requirements: access to USB-C and BOOT/RESET, ventilation, no pressure on the display, a desk stand and a fastening method. Measure the board, connectors and tolerances, and review the official drawings. Print a fit test before publishing a version ready to replicate. Document material, orientation, layers, supports and screws according to the final design.
+Desk enclosure for the [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.md), version 3: two parts, horizontal screen tilted 12° backwards and a snap-fit lid, without screws. It goes with the [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.md) sketch.
 
-## Status and next steps
+Status: designed and printed. The image is a render produced by the model script, not a photo. Its labels and the file names are in Spanish.
 
-The `source/` and `stl/` folders are empty: there is no file to print yet.
+## Files
 
-1. Measure the real board and review the manufacturer's drawings. See [hardware](../docs/hardware.md).
-2. Design a parametric model (OpenSCAD or an equivalent CAD) and save it in `source/`.
-3. Print a fit test and adjust tolerances.
-4. Publish the STL files in `stl/` with the print settings used.
+| File | Purpose |
+|---|---|
+| [`stl/claude-esp32-v3.3mf`](stl/claude-esp32-v3.3mf) | Both parts together, to open in Bambu Studio or another slicer |
+| [`stl/carcasa.stl`](stl/carcasa.stl) | Body: 66 × 39.5 × 28 mm |
+| [`stl/tapa.stl`](stl/tapa.stl) | Back lid with the clips: 51 × 31 × 12 mm |
+| [`source/generar_modelo.py`](source/generar_modelo.py) | Parametric model: generates the STL files, the preview and `validacion.json` |
+| [`source/empaquetar.py`](source/empaquetar.py) | Builds the 3MF from the STL files |
+| [`source/validacion.json`](source/validacion.json) | Measurements and geometric checks of the latest generation |
+
+The STL files are in millimeters, at 100% scale.
+
+## Design
+
+- **Stand**: four legs and a rear foot that share the contact plane; the screen sits tilted 12°.
+- **Lid**: two flexible tabs with a hook, printed as part of the lid. No screws or extra parts.
+- **USB-C on the right**: 15 × 8.8 mm opening with a reinforced frame. The rear edge is 2.4 mm thick.
+- **BOOT and RESET**: reachable from the top and the bottom, near the USB end.
+- **RGB LED**: open windows in the walls; no diffusers are printed.
+- **Ventilation**: three slots in the lid.
+- **Board**: the module is taken as 36.37 × 20.32 × 7.60 mm, from the [Waveshare drawing](https://docs.waveshare.com/ESP32-C6-LCD-1.47), with 0.45 mm of clearance per side. The microSD slot is reachable with the lid off.
+
+## Printing
+
+1. Open `stl/claude-esp32-v3.3mf` in the slicer, as geometry. It contains only the body and the lid: choose printer, filament and profile.
+2. Keep the scale at 100%.
+3. The body prints with its front on the bed; the lid, with its flat outer face on the bed.
+4. Check the bridges of the USB opening and the small ramps of the hooks in the sliced preview.
+5. Avoid supports that join or damage the tabs.
+
+The material, layer height and profile used for the test print are not documented yet.
+
+## Assembly
+
+1. Try it without the cable first: seat the module in the cavity with the USB-C port on the right, without pressing the screen glass.
+2. Align the lid and press gently until both clips engage. If it needs force, take it off and check the clearance and the finish of the tabs.
+3. Plug in the cable and check that it does not push the module out of place.
+
+To open it, press both tabs toward the center through the top and bottom windows, and pull the side grip of the lid backwards.
+
+## Regenerating the model
+
+```sh
+pip install manifold3d numpy trimesh matplotlib pillow
+python3 enclosure/source/generar_modelo.py
+python3 enclosure/source/empaquetar.py
+```
+
+The first script rewrites `stl/carcasa.stl`, `stl/tapa.stl`, `vista_previa.png` and `source/validacion.json`; the second one, `stl/claude-esp32-v3.3mf`. The preview uses the macOS Arial font.
+
+## What was verified
+
+- Geometry: each part is a closed solid, and Bambu Studio recognizes two valid solids in the 3MF.
+- No interference between body, lid, module and a 12 × 6 mm reference cable in the closed position.
+- The hooks hold the lid, and the lid comes out by flexing each clip 0.6 mm.
+- Legs and foot share the contact plane in the position of use.
+
+These checks are geometric: they do not simulate stress or fatigue. The durability of the clips was not measured.

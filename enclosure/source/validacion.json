@@ -1,0 +1,54 @@
+{
+  "inclinacion_grados": 12.0,
+  "carcasa": {
+    "dimensiones_mm": [
+      66.0,
+      39.5,
+      28.0
+    ],
+    "triangulos": 606,
+    "volumen_mm3": 17429.46,
+    "cerrada": true,
+    "solidos": 1
+  },
+  "tapa": {
+    "dimensiones_mm": [
+      51.0,
+      31.0,
+      12.0
+    ],
+    "triangulos": 984,
+    "volumen_mm3": 3947.56,
+    "cerrada": true,
+    "solidos": 1
+  },
+  "ensamble": {
+    "interferencia_carcasa_tapa_mm3": 0.0,
+    "retencion_al_tirar_sin_liberar_mm3": 0.9,
+    "recorrido_liberado_interferencias_mm3": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "espesor_borde_trasero_usb_mm": 2.4,
+    "hueco_usb_mm": [
+      15.0,
+      8.8
+    ],
+    "cable_referencia_mm": [
+      12,
+      6
+    ],
+    "interferencia_cable_mm3": 0.0
+  },
+  "apoyo": {
+    "altura_minima_mm": -0.0,
+    "vertices_coplanares": 20,
+    "profundidad_apoyo_mm": 28.626
+  }
+}

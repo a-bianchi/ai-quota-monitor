@@ -17,7 +17,8 @@ La imagen es un render hecho en una computadora con el código de dibujo del fir
 | Demo oficial de Waveshare en la placa real (compilar, subir, pantalla encendida) | Probado |
 | Este firmware compila para ESP32C6 Dev Module con las versiones de abajo | Verificado (unos 575 KB) |
 | Parser y diseño de pantalla contra respuestas reales de `GET /usage`, en una computadora | Verificado |
-| Este firmware en la placa física: pantalla, Wi-Fi, HTTP, HTTPS | **Todavía no probado** |
+| Este firmware en la placa física: pantalla, Wi-Fi, HTTP | Probado |
+| Este firmware en la placa física con una dirección `https://` | **Todavía no probado** |
 
 ## Versiones
 
@@ -205,6 +206,8 @@ Lo que muestra la pantalla:
 - **Act.**: cuándo se observó al proveedor por última vez (`updatedAt`). La línea de abajo es otra cosa: cuándo la placa leyó la API.
 - **Estado de la cuenta**: `↻ Desact.` (`stale`), `⚠ Sin sesion` (`auth_required`) o `✕ Sin datos` (`unavailable`), al lado del nombre.
 - **MOCK**: en naranja, en las cuentas con `source: mock`. Esos números son de ejemplo, no tu consumo real.
+- **Botón BOOT** (al costado de la placa, junto a RESET): muestra la página siguiente en el momento, sin esperar los 10 segundos de la rotación.
+- **LED RGB**: sigue a la página en pantalla, con el peor `usageLevel` de sus cupos: `low` verde, `medium` naranja, `high` rojo; apagado cuando no hay nivel o no hay datos. `LED_BRIGHTNESS` en `config.h` regula su brillo (0 lo apaga). Si muestra rojo donde debería ir verde, poné `LED_COLOR_ORDER` en `LED_COLOR_ORDER_GRB`.
 - **Errores de lectura**: los últimos datos quedan en pantalla y la línea de abajo dice por qué no se pudo leer (sin Wi-Fi, sin conexión a la API, token rechazado, error HTTP). Tras 150 segundos sin una lectura correcta, todas las cuentas se marcan como desactualizadas. La placa reintenta sola, esperando de 5 segundos a 5 minutos entre intentos.
 
 Los textos se dibujan sin acentos ("Creditos", "dias"): las fuentes incluidas en LVGL no tienen letras acentuadas.
@@ -259,7 +262,6 @@ El servidor responde `GET /usage` con lo que tiene guardado; leerlo desde la pla
 
 ## Pendiente en hardware
 
-- Correr este firmware en la placa física y revisar colores, brillo y legibilidad.
 - Probar la reconexión Wi-Fi y ejecuciones largas.
 - Probar una dirección `https://` con un certificado real.
-- LED RGB opcional para saldo bajo: no implementado.
+- Probar el botón BOOT y los colores del LED RGB en la placa física.

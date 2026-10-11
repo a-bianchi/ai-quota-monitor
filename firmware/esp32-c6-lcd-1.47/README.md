@@ -13,6 +13,6 @@ Quick reference:
 - Board: **ESP32C6 Dev Module**. Partition Scheme: **Huge APP (3MB No OTA/1MB SPIFFS)**.
 - Versions: esp32 by Espressif Systems 3.3.12, LVGL 8.3.10 from the Waveshare demo ZIP, ArduinoJson 7.4.3.
 
-Status: it compiles and its parser and layout were checked on a computer against real API responses. It has **not** been tested on the physical board yet; only the official Waveshare demo was.
+Status: it runs on the physical board over HTTP. An `https://` address has not been tested on the board yet.
 
 The screen drivers are adapted from the official Waveshare demo. See [`ai_quota_monitor_vertical/NOTICE.md`](ai_quota_monitor_vertical/NOTICE.md).

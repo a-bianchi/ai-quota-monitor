@@ -34,7 +34,7 @@ Every AI service shows its usage somewhere different: a 5-hour window here, a we
 | Codex (ChatGPT) | Implemented | Device-code login through Codex App Server |
 | Cursor | Experimental | Session cookie; undocumented dashboard endpoint |
 | Claude Pro/Max | Experimental; [not permitted by Anthropic's terms](docs/providers/claude-subscription.md) | OAuth login; undocumented usage endpoint |
-| Kiro | Pending | Exists only as an example account |
+| Kiro | Evaluated, not implemented | Exists only as an example account |
 | ChatGPT (regular chat) | Not integrated | No complete counter was confirmed through an API |
 
 The clients have tests against simulated servers. Each provider's documentation states what was validated with real accounts and what was not: see [providers](docs/providers/README.md) and the [guide to connect them](docs/providers/connect.md).
@@ -99,19 +99,17 @@ A single Go process polls the providers on a timer, stores the latest value of e
 
 ## Hardware
 
-The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. The firmware is in [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/) and compiles with Arduino IDE; it has not been tested on the physical board yet. There is no enclosure yet. The server and the panel work without the board. See [hardware](docs/hardware.md) for the exact board and where to buy it, the [firmware guide](docs/firmware.md) to build and flash it, and [enclosure](enclosure/README.md).
+The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. The firmware is in [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/) and compiles with Arduino IDE; it runs on the physical board. A 3D-printable [enclosure](enclosure/README.md) holds it on a desk. The server and the panel work without the board. See [hardware](docs/hardware.md) for the exact board and where to buy it, the [firmware guide](docs/firmware.md) to build and flash it, and [enclosure](enclosure/README.md).
 
 ## Project status
 
-Working today: server, API, web panel, example mode, Docker Compose and the OpenRouter, Codex, Cursor and Claude clients.
+Working today: server, API, web panel, example mode, Docker Compose, the OpenRouter, Codex, Cursor and Claude clients, the ESP32 firmware on the physical board, the 3D-printed enclosure and the Coolify deployment.
 
 Pending:
 
-- Tests of the ESP32 firmware on the physical board.
-- Enclosure design and files for 3D printing.
-- Kiro integration.
+- Kiro integration: evaluated, not implemented.
 - Validation of the experimental integrations with real accounts.
-- A real, tested Coolify deployment.
+- Firmware over HTTPS with a real certificate.
 
 The details are in the [roadmap](docs/roadmap.md).
 

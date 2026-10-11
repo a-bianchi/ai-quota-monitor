@@ -34,7 +34,7 @@ Cada servicio de IA muestra su consumo en un lugar distinto: una ventana de 5 ho
 | Codex (ChatGPT) | Implementado | Login por código de dispositivo, mediante Codex App Server |
 | Cursor | Experimental | Cookie de sesión; endpoint no documentado del dashboard |
 | Claude Pro/Max | Experimental; [no permitido por los términos de Anthropic](docs/providers/claude-subscription.es.md) | Login OAuth; endpoint de uso no documentado |
-| Kiro | Pendiente | Solo existe como cuenta de ejemplo |
+| Kiro | Evaluado, sin implementar | Solo existe como cuenta de ejemplo |
 | ChatGPT (chat normal) | No integrado | No se confirmó un contador completo por API |
 
 Los clientes tienen tests contra servidores simulados. La documentación de cada proveedor indica qué se validó con cuentas reales y qué no: ver [proveedores](docs/providers/README.es.md) y la [guía para conectarlos](docs/providers/connect.es.md).
@@ -99,19 +99,17 @@ Un solo proceso Go consulta a los proveedores con un temporizador, guarda el úl
 
 ## Hardware
 
-El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. El firmware está en [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/README.es.md) y compila con Arduino IDE; todavía no se probó en la placa física. Todavía no hay carcasa. El servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md) para la placa exacta y dónde comprarla, la [guía del firmware](docs/firmware.es.md) para compilarlo y cargarlo, y [carcasa](enclosure/README.es.md).
+El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. El firmware está en [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/README.es.md) y compila con Arduino IDE; funciona en la placa física. Una [carcasa](enclosure/README.es.md) para imprimir en 3D la sostiene sobre el escritorio. El servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md) para la placa exacta y dónde comprarla, la [guía del firmware](docs/firmware.es.md) para compilarlo y cargarlo, y [carcasa](enclosure/README.es.md).
 
 ## Estado del proyecto
 
-Funciona hoy: servidor, API, panel web, modo de ejemplo, Docker Compose y los clientes de OpenRouter, Codex, Cursor y Claude.
+Funciona hoy: servidor, API, panel web, modo de ejemplo, Docker Compose, los clientes de OpenRouter, Codex, Cursor y Claude, el firmware del ESP32 en la placa física, la carcasa impresa en 3D y el despliegue en Coolify.
 
 Pendiente:
 
-- Pruebas del firmware del ESP32 en la placa física.
-- Diseño de la carcasa y archivos para impresión 3D.
-- Integración con Kiro.
+- Integración con Kiro: evaluada, sin implementar.
 - Validación con cuentas reales de las integraciones experimentales.
-- Un despliegue real probado en Coolify.
+- Firmware por HTTPS con un certificado real.
 
 El detalle está en el [roadmap](docs/roadmap.es.md).
 

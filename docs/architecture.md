@@ -66,7 +66,7 @@ The JSON files are written atomically. The design assumes a single instance: do 
 ├── compose.yaml              Docker Compose service
 ├── Makefile                  Build, test and run commands
 ├── docs/                     Documentation, screenshots and Postman collection
-├── enclosure/                Enclosure (design pending)
+├── enclosure/                3D-printable enclosure
 ├── firmware/                 ESP32 firmware
 └── server/
     ├── Dockerfile

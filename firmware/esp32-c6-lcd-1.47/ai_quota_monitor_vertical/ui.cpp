@@ -65,6 +65,11 @@ static const uint32_t ROTATE_MS = 10 * 1000;
 // Data kept after failed reads is marked as stale once it is this old.
 static const uint32_t STALE_MARK_MS = 150 * 1000;
 
+// BOOT button on the side of the board (LOW while pressed) and on-board RGB LED.
+static const int BUTTON_PIN = 9;
+static const int LED_PIN = 8;
+static const uint32_t DEBOUNCE_MS = 40;
+
 // Same palette as the panel; usageLevel picks green, orange, red or gray.
 #define COLOR_TEXT lv_color_hex(0xFFFFFF)
 #define COLOR_MUTED lv_color_hex(0x9AA7B4)
@@ -536,7 +541,49 @@ static void renderPage() {
   pair(footer, FONT_SMALL, footerColor, tail, FONT_SMALL, mock ? COLOR_MEDIUM : COLOR_MUTED, PAD_X, FOOTER_Y, INNER_W);
 }
 
+// Worst usageLevel among the accounts of the page on screen.
+static Level pageLevel() {
+  Level worst = LEVEL_UNKNOWN;
+  if (pageCount == 0) {
+    return worst;
+  }
+  const Page &page = pages[pageIndex];
+  for (int i = 0; i < page.chunkCount; i++) {
+    const Account &a = view.data.accounts[chunks[page.firstChunk + i].account];
+    for (int k = 0; k < a.quotaCount; k++) {
+      worst = max(worst, view.data.quotas[a.firstQuota + k].level);
+    }
+  }
+  return worst;
+}
+
+// RGB LED: green, orange or red as the page on screen; off without a level.
+static void renderLed() {
+  uint8_t r = 0, g = 0;
+  switch (pageLevel()) {
+    case LEVEL_LOW: g = 255; break;
+    case LEVEL_MEDIUM: r = 255, g = 70; break;
+    case LEVEL_HIGH: r = 255; break;
+    default: break;
+  }
+  rgbLedWriteOrdered(LED_PIN, LED_COLOR_ORDER, r * LED_BRIGHTNESS / 100, g * LED_BRIGHTNESS / 100, 0);
+}
+
+// True once for each press of the button.
+static bool buttonPressed(uint32_t now) {
+  static bool down = false;
+  static uint32_t changedAt = 0;
+  bool reading = digitalRead(BUTTON_PIN) == LOW;
+  if (reading == down || now - changedAt < DEBOUNCE_MS) {
+    return false;
+  }
+  down = reading;
+  changedAt = now;
+  return down;
+}
+
 static void render() {
+  renderLed();
   lv_obj_clean(lv_scr_act());
   if (pageCount == 0) {
     renderMessage();
@@ -551,6 +598,7 @@ void uiBegin() {
   lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
   lv_obj_clear_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
   view.link = LINK_STARTING;
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   render();
   lastRotate = millis();
 }
@@ -567,7 +615,9 @@ void uiLoop() {
     }
     render();
   }
-  if (pageCount > 1 && now - lastRotate >= ROTATE_MS) {
+  // The button shows the next page right away and restarts the rotation time.
+  bool pressed = buttonPressed(now);
+  if (pageCount > 1 && (pressed || now - lastRotate >= ROTATE_MS)) {
     lastRotate = now;
     pageIndex = (pageIndex + 1) % pageCount;
     render();

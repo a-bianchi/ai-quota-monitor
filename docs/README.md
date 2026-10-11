@@ -37,8 +37,8 @@ Index of the AI Quota Monitor documentation. For an overview, start with the [ma
 | Topic | Document | Status |
 |---|---|---|
 | Board, materials and pins | [Hardware](hardware.md) | Official demo tested on the board |
-| Firmware: step-by-step setup, flashing and troubleshooting | [Firmware](firmware.md) | Compiles; not tested on the board |
-| Enclosure and 3D printing | [Enclosure](../enclosure/README.md) | Pending |
+| Firmware: step-by-step setup, flashing and troubleshooting | [Firmware](firmware.md) | Tested on the board over HTTP |
+| Enclosure and 3D printing | [Enclosure](../enclosure/README.md) | Designed and printed |
 
 ## Project
 

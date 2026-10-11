@@ -66,7 +66,7 @@ Los archivos JSON se escriben de forma atómica. El diseño asume una sola insta
 ├── compose.yaml              Servicio para Docker Compose
 ├── Makefile                  Comandos de compilación, pruebas y ejecución
 ├── docs/                     Documentación, capturas y colección de Postman
-├── enclosure/                Carcasa (pendiente de diseño)
+├── enclosure/                Carcasa para imprimir en 3D
 ├── firmware/                 Firmware del ESP32
 └── server/
     ├── Dockerfile

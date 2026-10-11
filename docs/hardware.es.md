@@ -9,7 +9,7 @@ Lista de materiales inicial:
 - Placa Waveshare ESP32-C6-LCD-1.47.
 - Cable USB-C de datos para programar y alimentar.
 - Puerto USB o fuente compatible.
-- Carcasa impresa, pendiente de diseño y validación.
+- [Carcasa](../enclosure/README.es.md) impresa, opcional.
 
 MicroSD no requerida para el MVP.
 
@@ -33,13 +33,14 @@ Las publicaciones y los vendedores cambian, y estos enlaces pueden dejar de func
 
 La pantalla, el LED RGB y la ranura microSD vienen integrados en la placa: no hay nada que cablear ni soldar. El único cable es el USB-C, que alimenta la placa y sirve para programarla.
 
-Para programar la placa, seguí la [guía del firmware](firmware.es.md). No hay instrucciones de montaje validadas todavía: dependen de la [carcasa](../enclosure/README.es.md), que está pendiente.
+Para programar la placa, seguí la [guía del firmware](firmware.es.md). Para montarla, ver la [carcasa](../enclosure/README.es.md).
 
 ## Estado y próximos pasos
 
 - El demo oficial de Waveshare se compiló, se cargó y se vio en la placa real, con los pines listados arriba.
-- El [firmware](firmware.es.md) del proyecto compila; todavía no se probó en una placa física.
-- Próximo paso: cargar el firmware y revisar pantalla, Wi-Fi y legibilidad.
+- El [firmware](firmware.es.md) del proyecto funciona en la placa física.
+- La [carcasa](../enclosure/README.es.md) está diseñada e impresa.
+- Próximo paso: probar HTTPS con un certificado real.
 - La vista **Display** del [panel web](panel.es.md) muestra el mismo contenido en un navegador.
 
 ## Fuentes

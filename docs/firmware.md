@@ -17,7 +17,8 @@ The image is a render made on a computer with the firmware's drawing code and th
 | Official Waveshare demo on the real board (compile, upload, screen on) | Tested |
 | This firmware compiles for ESP32C6 Dev Module with the versions below | Verified (about 575 KB) |
 | Parser and screen layout against real `GET /usage` responses, on a computer | Verified |
-| This firmware on the physical board: screen, Wi-Fi, HTTP, HTTPS | **Not tested yet** |
+| This firmware on the physical board: screen, Wi-Fi, HTTP | Tested |
+| This firmware on the physical board with an `https://` address | **Not tested yet** |
 
 ## Versions
 
@@ -205,6 +206,8 @@ What the screen shows:
 - **Upd.**: when the provider was last observed (`updatedAt`). The bottom line is a different thing: when the board last read the API.
 - **Account status**: `↻ Stale`, `⚠ Login` (`auth_required`) or `✕ No data` (`unavailable`), next to the name.
 - **MOCK**: in orange, on accounts with `source: mock`. Those numbers are examples, not your real usage.
+- **BOOT button** (on the side of the board, next to RESET): shows the next page right away, without waiting the 10 seconds of the rotation.
+- **RGB LED**: follows the page on screen, with the worst `usageLevel` of its quotas: `low` green, `medium` orange, `high` red; off when there is no level or no data. `LED_BRIGHTNESS` in `config.h` sets its brightness (0 turns it off). If it shows red where green is expected, set `LED_COLOR_ORDER` to `LED_COLOR_ORDER_GRB`.
 - **Read errors**: the last data stays on screen and the bottom line says why it could not be read (no Wi-Fi, API unreachable, token rejected, HTTP error). After 150 seconds without a good read, every account is marked as stale. The board retries on its own, waiting from 5 seconds up to 5 minutes between attempts.
 
 Texts are drawn without accents ("Creditos", "dias"): the fonts included in LVGL have no accented letters.
@@ -259,7 +262,6 @@ The server answers `GET /usage` from what it has stored; reading it from the boa
 
 ## Pending on hardware
 
-- Run this firmware on the physical board and check colors, brightness and legibility.
 - Test Wi-Fi reconnection and long runs.
 - Test an `https://` address with a real certificate.
-- Optional RGB LED for low balance: not implemented.
+- Check the BOOT button and the colors of the RGB LED on the physical board.

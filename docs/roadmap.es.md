@@ -17,21 +17,22 @@
 - Credenciales de proveedores cargadas desde el panel y guardadas cifradas.
 - `usageLevel` por cupo en `GET /usage`.
 - Nombres de cupos en español o inglés y fechas en la zona horaria pedida.
-- Firmware para ESP32-C6 con Arduino IDE y LVGL 8.3: compila y tiene guía paso a paso; sin probar en la placa.
+- Firmware para ESP32-C6 con Arduino IDE y LVGL 8.3: tiene guía paso a paso y funciona en la placa física.
+- Carcasa de dos piezas para imprimir en 3D, con tapa a presión: modelo paramétrico, STL y 3MF; impresa.
+- Despliegue en un servidor Coolify local.
 
 ## Próximo
 
 1. Validar OpenRouter con una management key propia.
 2. Validar login y cupos reales de ambas cuentas con el login HTTP implementado.
-3. Validar el firmware en la placa real: LCD, Wi-Fi y TLS.
-4. Validar Cursor con una sesión real; evaluar acceso sin admin en Kiro.
+3. Probar el firmware por HTTPS con un certificado real, la reconexión Wi-Fi y ejecuciones largas.
+4. Validar Cursor con una sesión real; implementar Kiro si vale la pena (ver [proveedores](providers/README.es.md)).
 5. Validar Claude con una cuenta real; reemplazarlo si Anthropic publica una vía oficial.
-6. Diseñar, imprimir y verificar carcasa.
+6. Documentar el material y el perfil de impresión de la carcasa.
 
 ## Decisiones abiertas
 
 - Frescura por cupo si hay observaciones independientes.
 - Tokens individuales por recolector y permisos por cuenta.
-- Modelo paramétrico de carcasa (OpenSCAD o CAD equivalente).
 
-El backend todavía no tuvo despliegue real ni pruebas con cuentas reales. No hay instrucciones de montaje físico validadas.
+Las integraciones experimentales todavía no se validaron con cuentas reales.

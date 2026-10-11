@@ -13,6 +13,6 @@ Referencia rápida:
 - Placa: **ESP32C6 Dev Module**. Partition Scheme: **Huge APP (3MB No OTA/1MB SPIFFS)**.
 - Versiones: esp32 by Espressif Systems 3.3.12, LVGL 8.3.10 del ZIP del demo de Waveshare, ArduinoJson 7.4.3.
 
-Estado: compila, y su parser y su diseño se revisaron en una computadora contra respuestas reales de la API. Todavía **no** se probó en la placa física; solo se probó el demo oficial de Waveshare.
+Estado: funciona en la placa física por HTTP. Todavía no se probó una dirección `https://` en la placa.
 
 Los drivers de pantalla están adaptados del demo oficial de Waveshare. Ver [`ai_quota_monitor_vertical/NOTICE.md`](ai_quota_monitor_vertical/NOTICE.md).

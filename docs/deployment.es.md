@@ -38,7 +38,7 @@ Entrá al panel por HTTPS siempre que no esté en una red confiable. `HOST_BIND`
 
 ## Coolify o nube
 
-Para Coolify, desplegá `compose.coolify.yaml` desde Git (build pack Docker Compose, con ese archivo como ubicación del Compose), configurá las variables en el panel y conservá el volumen. Publica el puerto 8090 del host (`HOST_PORT`), porque el proxy de Coolify ya usa el 8080, y toma las configuraciones de la imagen en lugar de montar `server/configs`. Se accede en `http://IP_DEL_SERVIDOR:8090`, o asignando un dominio al servicio `api` en el puerto 8080 del contenedor. Ahí `CONFIG_NAME` vale `config.live.json` por defecto. El health check de la imagen llama a `GET /ping`. No se probó un despliegue real en Coolify todavía.
+Para Coolify, desplegá `compose.coolify.yaml` desde Git (build pack Docker Compose, con ese archivo como ubicación del Compose), configurá las variables en el panel y conservá el volumen. Publica el puerto 8090 del host (`HOST_PORT`), porque el proxy de Coolify ya usa el 8080, y toma las configuraciones de la imagen en lugar de montar `server/configs`. Se accede en `http://IP_DEL_SERVIDOR:8090`, o asignando un dominio al servicio `api` en el puerto 8080 del contenedor. Ahí `CONFIG_NAME` vale `config.live.json` por defecto. El health check de la imagen llama a `GET /ping`. Probado en un servidor Coolify local.
 
 Para conexiones fuera de una red confiable, publicá HTTPS detrás de un proxy con certificado válido. Los tokens de lectura/ingestión siguen siendo obligatorios. No abrir el puerto HTTP directamente a Internet. El firmware deberá validar el certificado TLS.
 

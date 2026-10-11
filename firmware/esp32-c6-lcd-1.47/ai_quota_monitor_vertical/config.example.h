@@ -31,3 +31,10 @@
 
 // Backlight, 0 to 100. The manufacturer recommends 50 or lower for prolonged use.
 #define DISPLAY_BRIGHTNESS 40
+
+// RGB LED, 0 to 100; 0 turns it off. It shows the usage level of the page on
+// screen: green for low, orange for medium, red for high.
+#define LED_BRIGHTNESS 10
+
+// If the LED shows red where green is expected, use LED_COLOR_ORDER_GRB.
+#define LED_COLOR_ORDER LED_COLOR_ORDER_RGB

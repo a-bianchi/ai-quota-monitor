@@ -1,16 +1,69 @@
-# Carcasa — pendiente de diseño
+# Carcasa
 
 [English](README.md) · **Español**
 
-Se publicarán fuente editable en `source/` y STL en `stl/` cuando el modelo esté diseñado y probado. No se incluyen STL ficticios ni dimensiones asumidas.
+![Vista previa de la carcasa: frente con la pantalla horizontal, lateral con el USB-C y parte trasera con la tapa a presión](vista_previa.png)
 
-Requisitos: acceso USB-C, BOOT/RESET, ventilación, pantalla sin presión, soporte de escritorio y método de fijación. Medir placa, conectores, tolerancias y revisar planos oficiales. Imprimir una prueba de encastre antes de publicar versión lista para replicar. Documentar material, orientación, capas, soportes y tornillos según diseño final.
+Carcasa de escritorio para la [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.es.md), versión 3: dos piezas, pantalla horizontal inclinada 12° hacia atrás y tapa a presión, sin tornillos. Va con el sketch [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.es.md).
 
-## Estado y próximos pasos
+Estado: diseñada e impresa. La imagen es un render generado por el script del modelo, no una foto.
 
-Las carpetas `source/` y `stl/` están vacías: todavía no hay ningún archivo para imprimir.
+## Archivos
 
-1. Medir la placa real y revisar los planos del fabricante. Ver [hardware](../docs/hardware.es.md).
-2. Diseñar un modelo paramétrico (OpenSCAD o un CAD equivalente) y guardarlo en `source/`.
-3. Imprimir una prueba de encastre y ajustar tolerancias.
-4. Publicar los STL en `stl/` con los parámetros de impresión usados.
+| Archivo | Para qué |
+|---|---|
+| [`stl/claude-esp32-v3.3mf`](stl/claude-esp32-v3.3mf) | Las dos piezas juntas, para abrir en Bambu Studio u otro laminador |
+| [`stl/carcasa.stl`](stl/carcasa.stl) | Cuerpo: 66 × 39,5 × 28 mm |
+| [`stl/tapa.stl`](stl/tapa.stl) | Tapa trasera con las trabas: 51 × 31 × 12 mm |
+| [`source/generar_modelo.py`](source/generar_modelo.py) | Modelo paramétrico: genera los STL, la vista previa y `validacion.json` |
+| [`source/empaquetar.py`](source/empaquetar.py) | Arma el 3MF a partir de los STL |
+| [`source/validacion.json`](source/validacion.json) | Medidas y chequeos geométricos de la última generación |
+
+Los STL están en milímetros y a escala 100 %.
+
+## Diseño
+
+- **Apoyo**: cuatro patas y un pie trasero que comparten el plano de apoyo; la pantalla queda inclinada 12°.
+- **Tapa**: dos lengüetas flexibles con gancho, impresas junto con la tapa. No lleva tornillos ni piezas adicionales.
+- **USB-C a la derecha**: abertura de 15 × 8,8 mm con marco reforzado. El borde trasero tiene 2,4 mm.
+- **BOOT y RESET**: accesibles por arriba y por abajo, cerca del extremo del USB.
+- **LED RGB**: ventanas abiertas en las paredes; no se imprimen difusores.
+- **Ventilación**: tres ranuras en la tapa.
+- **Placa**: el módulo se toma como 36,37 × 20,32 × 7,60 mm, según el [plano de Waveshare](https://docs.waveshare.com/ESP32-C6-LCD-1.47), con 0,45 mm de holgura por lado. La ranura microSD queda accesible con la tapa quitada.
+
+## Impresión
+
+1. Abrí `stl/claude-esp32-v3.3mf` en el laminador, como geometría. Contiene solo la carcasa y la tapa: elegí impresora, filamento y perfil.
+2. Mantené la escala en 100 %.
+3. La carcasa se imprime con el frente hacia la cama; la tapa, con la cara exterior plana hacia la cama.
+4. Revisá en el laminado los puentes de la abertura del USB y las rampas chicas de los ganchos.
+5. Evitá soportes que unan o dañen las lengüetas.
+
+El material, la altura de capa y el perfil usados en la impresión de prueba no están documentados todavía.
+
+## Armado
+
+1. Probá primero sin cable: apoyá el módulo en la cavidad con el USB-C a la derecha, sin presionar el vidrio de la pantalla.
+2. Alineá la tapa y presioná suavemente hasta que enganchen las dos trabas. Si pide fuerza, sacala y revisá la holgura y el acabado de las lengüetas.
+3. Conectá el cable y comprobá que no desplace el módulo.
+
+Para abrir, presioná las dos lengüetas hacia el centro por las ventanas de arriba y de abajo, y tirá hacia atrás de la pestaña lateral de la tapa.
+
+## Regenerar el modelo
+
+```sh
+pip install manifold3d numpy trimesh matplotlib pillow
+python3 enclosure/source/generar_modelo.py
+python3 enclosure/source/empaquetar.py
+```
+
+El primer script reescribe `stl/carcasa.stl`, `stl/tapa.stl`, `vista_previa.png` y `source/validacion.json`; el segundo, `stl/claude-esp32-v3.3mf`. La vista previa usa la fuente Arial de macOS.
+
+## Qué se verificó
+
+- Geometría: cada pieza es un sólido cerrado, y Bambu Studio reconoce dos sólidos válidos en el 3MF.
+- Sin interferencia entre carcasa, tapa, módulo y un cable de referencia de 12 × 6 mm en posición de cierre.
+- Los ganchos retienen la tapa, y la tapa sale flexionando 0,6 mm cada traba.
+- Patas y pie comparten el plano de apoyo en posición de uso.
+
+Estos chequeos son geométricos: no simulan esfuerzos ni fatiga. La durabilidad de las trabas no se midió.
