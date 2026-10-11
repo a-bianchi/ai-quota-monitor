@@ -14,26 +14,27 @@ Spanish and English, with a selector; the choice is saved in the browser. Spanis
 
 ## Screenshots
 
-Taken from the real panel with demo data; they show no real accounts or credentials. The interface is in Spanish, its default language.
+Taken from the real panel with demo data; they show no real accounts or credentials. The interface is in English; the panel also has Spanish, its default language.
 
 ![Services dashboard](assets/panel-dashboard.png)
 
-*Services, with the six fictitious accounts of example mode. The `EJEMPLO` tag marks `source: mock` accounts.*
+*Services, with the six fictitious accounts of example mode. The `MOCK` tag marks `source: mock` accounts.*
 
 ![Display preview](assets/panel-display.png)
 
-*Display: preview of the 172 × 320 px screen, at 2× scale, with the same example accounts.*
+*Display: preview of the 172 × 320 px screen, at 2× scale, with the same example accounts. The other layouts show one account per page, in portrait or landscape.*
 
 ![Settings](assets/panel-settings.png)
 
-*Settings, with the accounts of `config.live.json` and no session started or credential loaded.*
+*Settings, with the accounts of `config.live.json` and no session started or credential loaded. The account names come from that file.*
 
 To regenerate them, from the repo root:
 
 1. Create a test user with `make panel-password` and set `MASTER_KEY`.
 2. For Services and Display, start with `CONFIG_NAME=config.json` (example mode) and `make run`.
 3. For Settings, start with `CONFIG_NAME=config.live.json`, an empty `DATA_DIR` folder, the credential variables empty and `CODEX_BIN` pointing to a nonexistent path, so no real account is used.
-4. Capture each view with the browser 1280 px wide and save the PNG files in `docs/assets/` under the same names.
+4. Choose **English** in the language selector of the panel.
+5. Capture each view with the browser 1280 px wide and save the PNG files in `docs/assets/` under the same names.
 
 Check that no screenshot shows tokens, keys, emails or real accounts.
 

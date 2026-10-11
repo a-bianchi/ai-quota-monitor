@@ -2,7 +2,7 @@
 
 **English** · [Español](README.es.md)
 
-![Enclosure preview: front with the horizontal screen, side with the USB-C port and back with the snap-fit lid](vista_previa.png)
+![Enclosure preview: front with the horizontal screen, side with the USB-C port and back with the snap-fit lid](preview.png)
 
 Desk enclosure for the [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.md), version 3: two parts, horizontal screen tilted 12° backwards and a snap-fit lid, without screws. It goes with the [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.md) sketch.
 
@@ -12,7 +12,7 @@ Status: designed and printed on a Bambu Lab A1 mini. The image is a render produ
 
 | File | Purpose |
 |---|---|
-| [`stl/claude-esp32-v3.3mf`](stl/claude-esp32-v3.3mf) | Both parts together, to open in Bambu Studio or another slicer |
+| [`stl/claude-esp32-v6.3mf`](stl/claude-esp32-v6.3mf) | Both parts together, to open in Bambu Studio or another slicer |
 | [`stl/carcasa.stl`](stl/carcasa.stl) | Body: 66 × 39.5 × 28 mm |
 | [`stl/tapa.stl`](stl/tapa.stl) | Back lid with the clips: 51 × 31 × 12 mm |
 | [`source/generar_modelo.py`](source/generar_modelo.py) | Parametric model: generates the STL files, the preview and `validacion.json` |
@@ -33,7 +33,7 @@ The STL files are in millimeters, at 100% scale.
 
 ## Printing
 
-1. Open `stl/claude-esp32-v3.3mf` in the slicer, as geometry. It contains only the body and the lid: choose printer, filament and profile.
+1. Open `stl/claude-esp32-v6.3mf` in the slicer, as geometry. It contains only the body and the lid: choose printer, filament and profile.
 2. Keep the scale at 100%.
 3. The body prints with its front on the bed; the lid, with its flat outer face on the bed.
 4. Check the bridges of the USB opening and the small ramps of the hooks in the sliced preview.
@@ -57,7 +57,7 @@ python3 enclosure/source/generar_modelo.py
 python3 enclosure/source/empaquetar.py
 ```
 
-The first script rewrites `stl/carcasa.stl`, `stl/tapa.stl`, `vista_previa.png` and `source/validacion.json`; the second one, `stl/claude-esp32-v3.3mf`. The preview uses the macOS Arial font.
+The first script rewrites `stl/carcasa.stl`, `stl/tapa.stl`, `preview.png` and `source/validacion.json`; the second one, `stl/claude-esp32-v6.3mf`. The preview uses the macOS Arial font.
 
 ## What was verified
 

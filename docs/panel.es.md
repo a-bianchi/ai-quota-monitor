@@ -14,15 +14,15 @@ Español e inglés, con selector; la elección se guarda en el navegador. El idi
 
 ## Capturas
 
-Tomadas del panel real con datos de demostración; no muestran cuentas ni credenciales reales.
+Tomadas del panel real con datos de demostración; no muestran cuentas ni credenciales reales. La interfaz está en inglés; el panel también está en español, su idioma por defecto.
 
 ![Tablero de servicios](assets/panel-dashboard.png)
 
-*Servicios, con las seis cuentas ficticias del modo de ejemplo. La etiqueta `EJEMPLO` marca las cuentas `source: mock`.*
+*Servicios, con las seis cuentas ficticias del modo de ejemplo. La etiqueta `MOCK` (`EJEMPLO` con el panel en español) marca las cuentas `source: mock`.*
 
 ![Vista previa del display](assets/panel-display.png)
 
-*Display: vista previa de la pantalla de 172 × 320 px, a escala 2×, con las mismas cuentas de ejemplo.*
+*Display: vista previa de la pantalla de 172 × 320 px, a escala 2×, con las mismas cuentas de ejemplo. Los otros diseños muestran una cuenta por página, en vertical u horizontal.*
 
 ![Configuración](assets/panel-settings.png)
 
@@ -33,7 +33,8 @@ Para regenerarlas, desde la raíz del repo:
 1. Creá un usuario de prueba con `make panel-password` y definí `MASTER_KEY`.
 2. Para Servicios y Display, arrancá con `CONFIG_NAME=config.json` (modo de ejemplo) y `make run`.
 3. Para Configuración, arrancá con `CONFIG_NAME=config.live.json`, una carpeta `DATA_DIR` vacía, las variables de credenciales vacías y `CODEX_BIN` apuntando a una ruta inexistente, así no se usa ninguna cuenta real.
-4. Capturá cada vista con el navegador a 1280 px de ancho y guardá los PNG en `docs/assets/` con los mismos nombres.
+4. Elegí **English** en el selector de idioma del panel.
+5. Capturá cada vista con el navegador a 1280 px de ancho y guardá los PNG en `docs/assets/` con los mismos nombres.
 
 Revisá que ninguna captura muestre tokens, keys, emails ni cuentas reales.
 

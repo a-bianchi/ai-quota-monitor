@@ -1,0 +1,65 @@
+{
+  "tilt_degrees": 25.0,
+  "housing": {
+    "dimensions_mm": [
+      66.0,
+      45.0,
+      36.0
+    ],
+    "triangles": 742,
+    "volume_mm3": 18712.66,
+    "watertight": true,
+    "solids": 1
+  },
+  "rear-cover": {
+    "dimensions_mm": [
+      47.4,
+      36.4,
+      2.4
+    ],
+    "triangles": 90,
+    "volume_mm3": 3662.21,
+    "watertight": true,
+    "solids": 1
+  },
+  "assembly": {
+    "housing_cover_intersection_mm3": -0.0,
+    "sliding_path_intersections_mm3": [
+      -0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -0.0,
+      0.0,
+      0.0
+    ],
+    "guide_thickness_mm": 2.0,
+    "cover_depth_clearance_mm": 0.3999999999999999,
+    "usb_opposite_side_from_printed_v5": true,
+    "cavity_mm": [
+      39.2,
+      21.2,
+      9.3
+    ],
+    "measured_module_mm": [
+      38.0,
+      20.0,
+      9.0
+    ],
+    "module_depth_clearance_mm": 0.3,
+    "usb_opening_mm": [
+      15.0,
+      8.8
+    ]
+  },
+  "support": {
+    "minimum_height_mm": -0.0,
+    "coplanar_vertices": 28,
+    "support_depth_mm": 39.722,
+    "screen_upward_tilt_degrees": 25.0,
+    "coplanar_contact_triangles": 34
+  }
+}

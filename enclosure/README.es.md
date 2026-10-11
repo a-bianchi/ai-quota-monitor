@@ -2,7 +2,7 @@
 
 [English](README.md) · **Español**
 
-![Vista previa de la carcasa: frente con la pantalla horizontal, lateral con el USB-C y parte trasera con la tapa a presión](vista_previa.png)
+![Vista previa de la carcasa: frente con la pantalla horizontal, lateral con el USB-C y parte trasera con la tapa a presión](preview.png)
 
 Carcasa de escritorio para la [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.es.md), versión 3: dos piezas, pantalla horizontal inclinada 12° hacia atrás y tapa a presión, sin tornillos. Va con el sketch [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.es.md).
 
@@ -12,7 +12,7 @@ Estado: diseñada e impresa en una Bambu Lab A1 mini. La imagen es un render gen
 
 | Archivo | Para qué |
 |---|---|
-| [`stl/claude-esp32-v3.3mf`](stl/claude-esp32-v3.3mf) | Las dos piezas juntas, para abrir en Bambu Studio u otro laminador |
+| [`stl/claude-esp32-v6.3mf`](stl/claude-esp32-v6.3mf) | Las dos piezas juntas, para abrir en Bambu Studio u otro laminador |
 | [`stl/carcasa.stl`](stl/carcasa.stl) | Cuerpo: 66 × 39,5 × 28 mm |
 | [`stl/tapa.stl`](stl/tapa.stl) | Tapa trasera con las trabas: 51 × 31 × 12 mm |
 | [`source/generar_modelo.py`](source/generar_modelo.py) | Modelo paramétrico: genera los STL, la vista previa y `validacion.json` |
@@ -33,7 +33,7 @@ Los STL están en milímetros y a escala 100 %.
 
 ## Impresión
 
-1. Abrí `stl/claude-esp32-v3.3mf` en el laminador, como geometría. Contiene solo la carcasa y la tapa: elegí impresora, filamento y perfil.
+1. Abrí `stl/claude-esp32-v6.3mf` en el laminador, como geometría. Contiene solo la carcasa y la tapa: elegí impresora, filamento y perfil.
 2. Mantené la escala en 100 %.
 3. La carcasa se imprime con el frente hacia la cama; la tapa, con la cara exterior plana hacia la cama.
 4. Revisá en el laminado los puentes de la abertura del USB y las rampas chicas de los ganchos.
@@ -57,7 +57,7 @@ python3 enclosure/source/generar_modelo.py
 python3 enclosure/source/empaquetar.py
 ```
 
-El primer script reescribe `stl/carcasa.stl`, `stl/tapa.stl`, `vista_previa.png` y `source/validacion.json`; el segundo, `stl/claude-esp32-v3.3mf`. La vista previa usa la fuente Arial de macOS.
+El primer script reescribe `stl/carcasa.stl`, `stl/tapa.stl`, `preview.png` y `source/validacion.json`; el segundo, `stl/claude-esp32-v6.3mf`. La vista previa usa la fuente Arial de macOS.
 
 ## Qué se verificó
 
