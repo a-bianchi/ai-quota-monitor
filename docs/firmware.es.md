@@ -2,13 +2,17 @@
 
 [English](firmware.md) · **Español**
 
+![Foto de la placa mostrando la página de una cuenta de Codex, con sus cupos de 5 horas y semanal](assets/esp32-display.png)
+
+La placa real con el sketch horizontal: una cuenta por página, con sus cupos, la renovación de cada uno y la hora de la última lectura.
+
 Firmware para la **Waveshare ESP32-C6-LCD-1.47** (sin touch). Se conecta a tu Wi-Fi, lee `GET /usage` de tu propio servidor y muestra los cupos personales y laborales, cambiando de página cada 10 segundos.
 
 Hay dos sketches, uno por orientación de la pantalla: [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/) (172 × 320) y [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/) (320 × 172). Los dos muestran una cuenta por página, con letra grande. Subí a la placa el que corresponda a cómo la vas a apoyar.
 
 ![Pantallas renderizadas en una computadora con el código de dibujo del firmware](assets/firmware-preview.png)
 
-La imagen es un render hecho en una computadora con el código de dibujo del firmware y los datos mock de la API. No es una foto de la placa.
+Esta segunda imagen es un render hecho en una computadora con el código de dibujo del firmware y los datos mock de la API. No es una foto de la placa.
 
 ## Estado de verificación
 
@@ -158,10 +162,11 @@ La carpeta y el archivo `.ino` tienen que conservar el mismo nombre. No saques e
 | `WIFI_PASSWORD` | Su contraseña |
 | `API_BASE_URL` | Dirección de **tu** servidor: `http://IP_O_HOSTNAME:PUERTO`, sin barra final |
 | `DEVICE_TOKEN` | El `DEVICE_TOKEN` de ese servidor |
-| `UI_LANGUAGE` | `"es"` o `"en"` |
+| `UI_LANGUAGE` | Idioma de la pantalla: `"es"` (español) o `"en"` (inglés) |
 | `API_TIMEZONE` | Zona horaria IANA para las horas en pantalla, por ejemplo `Europe/Madrid` |
 | `API_CA_CERT` | Solo para una autoridad certificante privada con `https://`; ver [HTTPS](#https) |
 | `DISPLAY_BRIGHTNESS` | 0 a 100. El fabricante recomienda 50 o menos |
+| `LED_BRIGHTNESS` | Brillo del LED RGB, 0 a 100; 0 lo apaga |
 
 `API_BASE_URL` apunta a donde hayas desplegado el servidor: la IP y el puerto son los de tu propia instalación, no un valor fijo. Dos ejemplos:
 
@@ -206,13 +211,33 @@ Lo que muestra la pantalla:
 - **Act.**: cuándo se observó al proveedor por última vez (`updatedAt`). La línea de abajo es otra cosa: cuándo la placa leyó la API.
 - **Estado de la cuenta**: `↻ Desact.` (`stale`), `⚠ Sin sesion` (`auth_required`) o `✕ Sin datos` (`unavailable`), al lado del nombre.
 - **MOCK**: en naranja, en las cuentas con `source: mock`. Esos números son de ejemplo, no tu consumo real.
-- **Botón BOOT** (al costado de la placa, junto a RESET): muestra la página siguiente en el momento, sin esperar los 10 segundos de la rotación.
-- **LED RGB**: sigue a la página en pantalla, con el peor `usageLevel` de sus cupos: `low` verde, `medium` naranja, `high` rojo; apagado cuando no hay nivel o no hay datos. `LED_BRIGHTNESS` en `config.h` regula su brillo (0 lo apaga). Si muestra rojo donde debería ir verde, poné `LED_COLOR_ORDER` en `LED_COLOR_ORDER_GRB`.
 - **Errores de lectura**: los últimos datos quedan en pantalla y la línea de abajo dice por qué no se pudo leer (sin Wi-Fi, sin conexión a la API, token rechazado, error HTTP). Tras 150 segundos sin una lectura correcta, todas las cuentas se marcan como desactualizadas. La placa reintenta sola, esperando de 5 segundos a 5 minutos entre intentos.
 
 Los textos se dibujan sin acentos ("Creditos", "dias"): las fuentes incluidas en LVGL no tienen letras acentuadas.
 
 La pantalla admite 16 cuentas y 48 cupos en total; lo que exceda eso no se muestra.
+
+## Idioma, botones y LED
+
+**Idioma.** La pantalla está en español o en inglés según `UI_LANGUAGE` en `config.h` (`"es"` o `"en"`; sin definir, español). Cambia los textos de la pantalla y los nombres de los cupos, que el servidor devuelve en ese idioma. Para cambiarlo, editá `config.h` y volvé a subir el firmware.
+
+**Botones.** Están al costado de la placa, junto al USB-C.
+
+| Botón | Qué hace |
+|---|---|
+| **BOOT** | Pasa a la página siguiente en el momento, sin esperar los 10 segundos de la rotación |
+| **RESET** | Reinicia la placa: vuelve a conectarse al Wi-Fi y a leer la API |
+
+**LED RGB.** Muestra el peor nivel de uso (`usageLevel`) entre los cupos de la página que está en pantalla, con los mismos colores que las barras.
+
+| Color | Nivel | Uso del cupo |
+|---|---|---|
+| Verde | `low` | Menos del 50 % |
+| Naranja | `medium` | Del 50 % al 80 % |
+| Rojo | `high` | Más del 80 % |
+| Apagado | — | Sin nivel o sin datos |
+
+`LED_BRIGHTNESS` regula el brillo. Si el LED muestra rojo donde debería ir verde, poné `LED_COLOR_ORDER` en `LED_COLOR_ORDER_GRB`.
 
 ## HTTPS
 

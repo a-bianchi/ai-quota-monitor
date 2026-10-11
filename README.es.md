@@ -99,7 +99,7 @@ Un solo proceso Go consulta a los proveedores con un temporizador, guarda el úl
 
 ## Hardware
 
-El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. El firmware está en [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/README.es.md) y compila con Arduino IDE; funciona en la placa física. Una [carcasa](enclosure/README.es.md) para imprimir en 3D la sostiene sobre el escritorio. El servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md) para la placa exacta y dónde comprarla, la [guía del firmware](docs/firmware.es.md) para compilarlo y cargarlo, y [carcasa](enclosure/README.es.md).
+El display objetivo es una **Waveshare ESP32-C6-LCD-1.47**: pantalla de 172 × 320 px, Wi-Fi de 2,4 GHz y alimentación por USB-C. El firmware está en [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/README.es.md) y compila con Arduino IDE; funciona en la placa física. Una [carcasa](enclosure/README.es.md) para imprimir en 3D la sostiene sobre el escritorio. La pantalla puede estar en español o en inglés, el botón BOOT pasa de página y el LED RGB se pone verde, naranja o rojo según el nivel de uso. El servidor y el panel funcionan sin la placa. Ver [hardware](docs/hardware.es.md) para la placa exacta y dónde comprarla, la [guía del firmware](docs/firmware.es.md) para compilarlo y cargarlo, y [carcasa](enclosure/README.es.md).
 
 ## Estado del proyecto
 

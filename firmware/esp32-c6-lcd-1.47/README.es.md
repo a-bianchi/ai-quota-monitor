@@ -2,6 +2,8 @@
 
 [English](README.md) · **Español**
 
+![Foto de la placa mostrando la página de una cuenta de Codex, con sus cupos de 5 horas y semanal](../../docs/assets/esp32-display.png)
+
 Sketch de Arduino que lee `GET /usage` de tu propio servidor y muestra los cupos personales y laborales en la pantalla de la placa.
 
 **Seguí la [guía del firmware](../../docs/firmware.es.md)**: explica, paso a paso, cómo instalar las herramientas y las bibliotecas, cargar la placa y resolver los problemas habituales.
@@ -10,6 +12,7 @@ Referencia rápida:
 
 - Sketch a abrir, según cómo vayas a apoyar la placa: [`ai_quota_monitor_vertical/ai_quota_monitor_vertical.ino`](ai_quota_monitor_vertical/ai_quota_monitor_vertical.ino) (pantalla de 172 × 320) o [`ai_quota_monitor_horizontal/ai_quota_monitor_horizontal.ino`](ai_quota_monitor_horizontal/ai_quota_monitor_horizontal.ino) (320 × 172). Los dos muestran una cuenta por página, con letra grande, y van rotando. Solo difieren en `layout.h`.
 - Configuración: en la carpeta del sketch elegido, copiá `config.example.h` a `config.h` y completá el Wi-Fi, la URL de tu API y su `DEVICE_TOKEN`. `config.h` está ignorado por Git.
+- Uso: pantalla en español o inglés (`UI_LANGUAGE` en `config.h`); el botón **BOOT** pasa a la página siguiente y el LED RGB muestra el nivel de uso en verde, naranja o rojo. Ver [idioma, botones y LED](../../docs/firmware.es.md#idioma-botones-y-led).
 - Placa: **ESP32C6 Dev Module**. Partition Scheme: **Huge APP (3MB No OTA/1MB SPIFFS)**.
 - Versiones: esp32 by Espressif Systems 3.3.12, LVGL 8.3.10 del ZIP del demo de Waveshare, ArduinoJson 7.4.3.
 

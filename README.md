@@ -99,7 +99,7 @@ A single Go process polls the providers on a timer, stores the latest value of e
 
 ## Hardware
 
-The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. The firmware is in [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/) and compiles with Arduino IDE; it runs on the physical board. A 3D-printable [enclosure](enclosure/README.md) holds it on a desk. The server and the panel work without the board. See [hardware](docs/hardware.md) for the exact board and where to buy it, the [firmware guide](docs/firmware.md) to build and flash it, and [enclosure](enclosure/README.md).
+The target display is a **Waveshare ESP32-C6-LCD-1.47**: 172 × 320 px screen, 2.4 GHz Wi-Fi and USB-C power. The firmware is in [`firmware/esp32-c6-lcd-1.47/`](firmware/esp32-c6-lcd-1.47/) and compiles with Arduino IDE; it runs on the physical board. A 3D-printable [enclosure](enclosure/README.md) holds it on a desk. The screen can be in Spanish or English, the BOOT button moves to the next page and the RGB LED turns green, orange or red with the usage level. The server and the panel work without the board. See [hardware](docs/hardware.md) for the exact board and where to buy it, the [firmware guide](docs/firmware.md) to build and flash it, and [enclosure](enclosure/README.md).
 
 ## Project status
 
@@ -108,7 +108,6 @@ Working today: server, API, web panel, example mode, Docker Compose, the OpenRou
 Pending:
 
 - Kiro integration: evaluated, not implemented.
-- Validation of the experimental integrations with real accounts.
 - Firmware over HTTPS with a real certificate.
 
 The details are in the [roadmap](docs/roadmap.md).

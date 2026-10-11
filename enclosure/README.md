@@ -6,7 +6,7 @@
 
 Desk enclosure for the [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.md), version 3: two parts, horizontal screen tilted 12° backwards and a snap-fit lid, without screws. It goes with the [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.md) sketch.
 
-Status: designed and printed. The image is a render produced by the model script, not a photo. Its labels and the file names are in Spanish.
+Status: designed and printed on a Bambu Lab A1 mini. The image is a render produced by the model script, not a photo. Its labels and the file names are in Spanish.
 
 ## Files
 
@@ -39,7 +39,7 @@ The STL files are in millimeters, at 100% scale.
 4. Check the bridges of the USB opening and the small ramps of the hooks in the sliced preview.
 5. Avoid supports that join or damage the tabs.
 
-The material, layer height and profile used for the test print are not documented yet.
+The enclosure was printed on a **Bambu Lab A1 mini**; the 3MF was opened and edited in **Bambu Studio** before printing. The material, layer height and profile used are not documented yet.
 
 ## Assembly
 

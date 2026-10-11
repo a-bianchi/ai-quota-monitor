@@ -6,7 +6,7 @@
 
 Carcasa de escritorio para la [Waveshare ESP32-C6-LCD-1.47](../docs/hardware.es.md), versión 3: dos piezas, pantalla horizontal inclinada 12° hacia atrás y tapa a presión, sin tornillos. Va con el sketch [`ai_quota_monitor_horizontal`](../firmware/esp32-c6-lcd-1.47/README.es.md).
 
-Estado: diseñada e impresa. La imagen es un render generado por el script del modelo, no una foto.
+Estado: diseñada e impresa en una Bambu Lab A1 mini. La imagen es un render generado por el script del modelo, no una foto.
 
 ## Archivos
 
@@ -39,7 +39,7 @@ Los STL están en milímetros y a escala 100 %.
 4. Revisá en el laminado los puentes de la abertura del USB y las rampas chicas de los ganchos.
 5. Evitá soportes que unan o dañen las lengüetas.
 
-El material, la altura de capa y el perfil usados en la impresión de prueba no están documentados todavía.
+La carcasa se imprimió en una **Bambu Lab A1 mini**; el 3MF se abrió y se editó en **Bambu Studio** antes de imprimir. El material, la altura de capa y el perfil usados no están documentados todavía.
 
 ## Armado
 

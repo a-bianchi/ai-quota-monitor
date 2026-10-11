@@ -18,7 +18,7 @@
 - Per-quota `usageLevel` in `GET /usage`.
 - Quota names in Spanish or English and dates in the requested time zone.
 - ESP32-C6 firmware with Arduino IDE and LVGL 8.3: it has a step-by-step guide and runs on the physical board.
-- Two-part 3D-printable enclosure with a snap-fit lid: parametric model, STL and 3MF files; printed.
+- Two-part 3D-printable enclosure with a snap-fit lid: parametric model, STL and 3MF files; printed on a Bambu Lab A1 mini.
 - Deployment on a local Coolify server.
 
 ## Next

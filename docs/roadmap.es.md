@@ -18,7 +18,7 @@
 - `usageLevel` por cupo en `GET /usage`.
 - Nombres de cupos en español o inglés y fechas en la zona horaria pedida.
 - Firmware para ESP32-C6 con Arduino IDE y LVGL 8.3: tiene guía paso a paso y funciona en la placa física.
-- Carcasa de dos piezas para imprimir en 3D, con tapa a presión: modelo paramétrico, STL y 3MF; impresa.
+- Carcasa de dos piezas para imprimir en 3D, con tapa a presión: modelo paramétrico, STL y 3MF; impresa en una Bambu Lab A1 mini.
 - Despliegue en un servidor Coolify local.
 
 ## Próximo

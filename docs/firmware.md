@@ -2,13 +2,17 @@
 
 **English** · [Español](firmware.es.md)
 
+![Photo of the board showing the page of a Codex account, with its 5-hour and weekly quotas](assets/esp32-display.png)
+
+The real board running the horizontal sketch, with the screen in Spanish: one account per page, with its quotas, the reset of each one and the time of the last read.
+
 Firmware for the **Waveshare ESP32-C6-LCD-1.47** (no touch). It connects to your Wi-Fi, reads `GET /usage` from your own server and shows the personal and work quotas, switching page every 10 seconds.
 
 There are two sketches, one per screen orientation: [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_vertical/) (172 × 320) and [`firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/`](../firmware/esp32-c6-lcd-1.47/ai_quota_monitor_horizontal/) (320 × 172). Both show one account per page, in large text. Upload the one that matches how the board will stand.
 
 ![Screens rendered on a computer with the firmware's own drawing code](assets/firmware-preview.png)
 
-The image is a render made on a computer with the firmware's drawing code and the mock API data. It is not a photo of the board.
+This second image is a render made on a computer with the firmware's drawing code and the mock API data. It is not a photo of the board.
 
 ## Verification status
 
@@ -158,10 +162,11 @@ The folder and the `.ino` file must keep the same name. Do not move the `.ino` o
 | `WIFI_PASSWORD` | Its password |
 | `API_BASE_URL` | Address of **your** server: `http://IP_OR_HOSTNAME:PORT`, without a trailing slash |
 | `DEVICE_TOKEN` | The `DEVICE_TOKEN` of that server |
-| `UI_LANGUAGE` | `"es"` or `"en"` |
+| `UI_LANGUAGE` | Screen language: `"es"` (Spanish) or `"en"` (English) |
 | `API_TIMEZONE` | IANA time zone for the times on screen, for example `Europe/Madrid` |
 | `API_CA_CERT` | Only for a private certificate authority with `https://`; see [HTTPS](#https) |
 | `DISPLAY_BRIGHTNESS` | 0 to 100. The manufacturer recommends 50 or lower |
+| `LED_BRIGHTNESS` | Brightness of the RGB LED, 0 to 100; 0 turns it off |
 
 `API_BASE_URL` points to wherever you deployed the server: the IP and port are those of your own installation, not a fixed value. Two examples:
 
@@ -206,13 +211,33 @@ What the screen shows:
 - **Upd.**: when the provider was last observed (`updatedAt`). The bottom line is a different thing: when the board last read the API.
 - **Account status**: `↻ Stale`, `⚠ Login` (`auth_required`) or `✕ No data` (`unavailable`), next to the name.
 - **MOCK**: in orange, on accounts with `source: mock`. Those numbers are examples, not your real usage.
-- **BOOT button** (on the side of the board, next to RESET): shows the next page right away, without waiting the 10 seconds of the rotation.
-- **RGB LED**: follows the page on screen, with the worst `usageLevel` of its quotas: `low` green, `medium` orange, `high` red; off when there is no level or no data. `LED_BRIGHTNESS` in `config.h` sets its brightness (0 turns it off). If it shows red where green is expected, set `LED_COLOR_ORDER` to `LED_COLOR_ORDER_GRB`.
 - **Read errors**: the last data stays on screen and the bottom line says why it could not be read (no Wi-Fi, API unreachable, token rejected, HTTP error). After 150 seconds without a good read, every account is marked as stale. The board retries on its own, waiting from 5 seconds up to 5 minutes between attempts.
 
 Texts are drawn without accents ("Creditos", "dias"): the fonts included in LVGL have no accented letters.
 
 The screen can hold 16 accounts and 48 quotas in total; anything beyond that is not shown.
+
+## Language, buttons and LED
+
+**Language.** The screen is in Spanish or English depending on `UI_LANGUAGE` in `config.h` (`"es"` or `"en"`; Spanish when not defined). It changes the screen texts and the quota names, which the server returns in that language. To change it, edit `config.h` and upload the firmware again.
+
+**Buttons.** They are on the side of the board, next to the USB-C port.
+
+| Button | What it does |
+|---|---|
+| **BOOT** | Goes to the next page right away, without waiting the 10 seconds of the rotation |
+| **RESET** | Restarts the board: it reconnects to Wi-Fi and reads the API again |
+
+**RGB LED.** It shows the worst usage level (`usageLevel`) among the quotas of the page on screen, with the same colors as the bars.
+
+| Color | Level | Quota usage |
+|---|---|---|
+| Green | `low` | Under 50% |
+| Orange | `medium` | From 50% to 80% |
+| Red | `high` | Above 80% |
+| Off | — | No level or no data |
+
+`LED_BRIGHTNESS` sets the brightness. If the LED shows red where green is expected, set `LED_COLOR_ORDER` to `LED_COLOR_ORDER_GRB`.
 
 ## HTTPS
 

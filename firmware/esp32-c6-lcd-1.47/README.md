@@ -2,6 +2,8 @@
 
 **English** · [Español](README.es.md)
 
+![Photo of the board showing the page of a Codex account, with its 5-hour and weekly quotas](../../docs/assets/esp32-display.png)
+
 Arduino sketch that reads `GET /usage` from your own server and shows the personal and work quotas on the board's screen.
 
 **Follow the [firmware guide](../../docs/firmware.md)**: it explains, step by step, how to install the tools and libraries, flash the board and solve the usual problems.
@@ -10,6 +12,7 @@ Quick reference:
 
 - Sketch to open, depending on how the board will stand: [`ai_quota_monitor_vertical/ai_quota_monitor_vertical.ino`](ai_quota_monitor_vertical/ai_quota_monitor_vertical.ino) (172 × 320 screen) or [`ai_quota_monitor_horizontal/ai_quota_monitor_horizontal.ino`](ai_quota_monitor_horizontal/ai_quota_monitor_horizontal.ino) (320 × 172). Both show one account per page, in large text, and rotate. They only differ in `layout.h`.
 - Configuration: in the folder of the sketch you chose, copy `config.example.h` to `config.h` and fill in Wi-Fi, the URL of your API and its `DEVICE_TOKEN`. `config.h` is ignored by Git.
+- Use: screen in Spanish or English (`UI_LANGUAGE` in `config.h`); the **BOOT** button goes to the next page and the RGB LED shows the usage level in green, orange or red. See [language, buttons and LED](../../docs/firmware.md#language-buttons-and-led).
 - Board: **ESP32C6 Dev Module**. Partition Scheme: **Huge APP (3MB No OTA/1MB SPIFFS)**.
 - Versions: esp32 by Espressif Systems 3.3.12, LVGL 8.3.10 from the Waveshare demo ZIP, ArduinoJson 7.4.3.
 
