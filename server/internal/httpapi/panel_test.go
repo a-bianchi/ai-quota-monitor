@@ -44,7 +44,7 @@ func newPanel(t *testing.T) *panelTest {
 			{ID: "collected", Name: "Collected", Provider: "kiro", Scope: "work", Source: "collector"},
 		},
 		Store: store, DeviceToken: "device", CollectorToken: "collector",
-		Username: "alejo", PasswordHash: testHash, Sessions: sessions, Secrets: vault, Web: web.Handler(),
+		Username: "admin", PasswordHash: testHash, Sessions: sessions, Secrets: vault, Web: web.Handler(),
 	}
 	return &panelTest{t: t, api: api, h: api.Handler(), dir: dir}
 }
@@ -69,7 +69,7 @@ func (p *panelTest) want(code int, method, path, bearer, body string) map[string
 }
 func (p *panelTest) login() (access, refresh string) {
 	p.t.Helper()
-	out := p.want(200, "POST", "/auth/login", "", `{"username":"alejo","password":"test-password-123"}`)
+	out := p.want(200, "POST", "/auth/login", "", `{"username":"admin","password":"test-password-123"}`)
 	access, _ = out["accessToken"].(string)
 	refresh, _ = out["refreshToken"].(string)
 	if access == "" || refresh == "" || access == refresh || out["tokenType"] != "Bearer" || out["expiresIn"] != float64(900) {
@@ -80,7 +80,7 @@ func (p *panelTest) login() (access, refresh string) {
 
 func TestPanelLoginAndRouteProtection(t *testing.T) {
 	p := newPanel(t)
-	p.want(401, "POST", "/auth/login", "", `{"username":"alejo","password":"wrong"}`)
+	p.want(401, "POST", "/auth/login", "", `{"username":"admin","password":"wrong"}`)
 	p.want(401, "POST", "/auth/login", "", `{"username":"other","password":"test-password-123"}`)
 	p.want(400, "POST", "/auth/login", "", `not json`)
 	access, refresh := p.login()
@@ -123,7 +123,7 @@ func TestPanelRefreshRotationAndLogout(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	restarted := &panelTest{t: t, api: &API{Username: "alejo", PasswordHash: testHash, Sessions: sessions}, dir: p.dir}
+	restarted := &panelTest{t: t, api: &API{Username: "admin", PasswordHash: testHash, Sessions: sessions}, dir: p.dir}
 	restarted.h = restarted.api.Handler()
 	restarted.want(200, "GET", "/accounts", access2, "")
 
@@ -153,9 +153,9 @@ func TestPanelRefreshRotationAndLogout(t *testing.T) {
 func TestPanelLoginRateLimit(t *testing.T) {
 	p := newPanel(t)
 	for i := 0; i < 5; i++ {
-		p.want(401, "POST", "/auth/login", "", `{"username":"alejo","password":"wrong"}`)
+		p.want(401, "POST", "/auth/login", "", `{"username":"admin","password":"wrong"}`)
 	}
-	w, _ := p.call("POST", "/auth/login", "", `{"username":"alejo","password":"test-password-123"}`)
+	w, _ := p.call("POST", "/auth/login", "", `{"username":"admin","password":"test-password-123"}`)
 	if w.Code != 429 || w.Header().Get("Retry-After") == "" {
 		t.Fatalf("expected 429 with Retry-After, got %d", w.Code)
 	}
